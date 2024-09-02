@@ -1,0 +1,39 @@
+# Specific Files & Folders
+*.csv
+*.txt
+*.docx
+*.columns
+*.xlsx
+_*
+gaps
+controller_old
+
+
+# env & config files
+.env
+env.py
+!__init__.py
+
+# Python
+__pycache__/
+Pipfile.lock
+
+
+#DB
+*.db
+*.db-shm
+*.db-wal
+
+
+# Logs
+logs
+*.log
+
+# other files
+*.png
+
+### Code ###
+# Visual Studio Code
+.settings/
+.vscode/
+
