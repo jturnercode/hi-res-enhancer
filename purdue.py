@@ -109,11 +109,15 @@ for phase in phases:
     df_start = df_data.filter(
         pl.col("event_code").is_in([1]), pl.col("parameter") == phase
     )
+
     df_end = df_data.filter(
         pl.col("event_code").is_in([11]), pl.col("parameter") == phase
     ).rename(lambda cname: cname + "2")
 
-    # TODO: handle df_start empty or df_end empty
+    # Skip event without matching
+    if df_start.is_empty() or df_end.is_empty():
+        print(f"Phase {phase} empty")
+        continue
 
     # Delete first row of df_end of start time > end time
     if df_start["dt"].item(0) > df_end["dt2"].item(0):
@@ -135,6 +139,50 @@ for phase in phases:
     # print(df_start)
     # print(df_end)
     # quit()
+
+    df_temp = (
+        df_start.hstack(df_end)
+        .with_columns(duration=pl.col("dt2") - pl.col("dt"))
+        .with_columns(pl.col("duration").dt.total_milliseconds() / 1000)
+    )
+
+    df_holder.append(df_temp)
+
+
+# ================================================
+#                Preempt Processing
+#
+#
+#
+#
+# ================================================
+
+preempts = df_data.filter(pl.col("event_code").is_in([102]))["parameter"].unique()
+
+
+for preempt in preempts:
+
+    df_start = df_data.filter(
+        pl.col("event_code").is_in([102]), pl.col("parameter") == preempt
+    )
+
+    df_end = df_data.filter(
+        pl.col("event_code").is_in([104]), pl.col("parameter") == preempt
+    ).rename(lambda cname: cname + "2")
+
+    # TODO: can we add start or end time for unpaired events
+    # Skip event without matching
+    if df_start.is_empty() or df_end.is_empty():
+        print(f"Preempt {preempt} empty")
+        continue
+
+    # Delete first row of df_end of start time > end time
+    if df_start["dt"].item(0) > df_end["dt2"].item(0):
+        df_end = df_end.slice(1, df_end.height)
+
+    # Delete last row of df_start if start time > end time
+    if df_start["dt"].item(df_start.height - 1) > df_end["dt2"].item(df_end.height - 1):
+        df_start = df_start.slice(0, df_start.height - 1)
 
     df_temp = (
         df_start.hstack(df_end)
