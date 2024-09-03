@@ -1,41 +1,81 @@
+import os
 import polars as pl
+import env
+
+
+# ===========================
+#  Read event code descriptors
+#
+#
+# ===========================
 
 # event codes
 ec = pl.read_csv(source="event_codes.csv")
 
 
 # ===========================
-#      Read Csv Data
+#      User Input
+#
+#   locid, date, time, # hours
+# ===========================
+
+id_input = input("ENTER Intersection ID: ")
+locid = ((5 - len(id_input)) * "0") + id_input
+
+# locate directory with files and create list
+path = env.DIRECTORY + locid
+dir_list = os.listdir(path)
+# print(dir_list)
+
+# TODO: filter out date/time
+# id_date = input("Enter date to process. ex. 2024-08-04: ")
+# id_hour = input("Enter start time (1400): ")
+# add_hours = input("Enter number of hours (default 0): ")
+# dir_list.index()
+
+
+# quit()
+
+
+# ===========================
+#      Process Csv Data
 #
 #
 # ===========================
-# purdue data in csv
-# TODO: add code to read as csv in directory
-# TODO: add intersection id to results
 
-df = pl.read_csv(
-    source="TRAF_00608_2024_08_23_0600.csv",
-    has_header=False,
-    skip_rows=6,
-    new_columns=["dt", "event_code", "parameter"],
-)
+df_holder = []
 
 
-# ===========================
-#      Clean/Format data
-#
-#   add event descriptor names
-# ===========================
+for file in dir_list:
+    print(file)
+    df = pl.read_csv(
+        # source="TRAF_00151_2024_08_22_0600.csv",
+        source=path + "\\" + file,
+        has_header=False,
+        skip_rows=6,
+        new_columns=["dt", "event_code", "parameter"],
+    )
 
-df = (
-    df.with_columns(
+    # ===========================
+    #      Clean/Format data
+    #
+    #   add event descriptor names
+    # ===========================
+
+    df = df.with_columns(
         pl.col("dt").str.to_datetime(r"%-m/%d/%Y %H:%M:%S%.3f"),
         pl.col("event_code").str.replace_all(" ", ""),
         pl.col("parameter").str.replace_all(" ", ""),
+        # location_id=pl.lit(locid),
     ).with_columns(
         pl.col("event_code").str.to_integer(),
         pl.col("parameter").str.to_integer(),
     )
+
+    df_holder.append(df)
+
+df_data: pl.DataFrame = (
+    pl.concat(df_holder).sort(by="dt")
     # Use series to map values from df to another df, great feature!!
     .with_columns(
         event_descriptor=pl.col("event_code").replace_strict(
@@ -43,6 +83,7 @@ df = (
         )
     )
 )
+# print(df_data)
 
 
 # ====================================
@@ -51,19 +92,24 @@ df = (
 #  begin green to Phase end redclear
 # ====================================
 
-df_holder = []
-
-phases = df.filter(pl.col("event_code").is_in([1]))["parameter"].unique()
+phases = df_data.filter(pl.col("event_code").is_in([1]))["parameter"].unique()
 
 # test code
 # phases = [6]
 
-for phase in phases:
+df_holder.clear()
 
-    df_start = df.filter(pl.col("event_code").is_in([1]), pl.col("parameter") == phase)
-    df_end = df.filter(
+for phase in phases:
+    print(phase)
+
+    df_start = df_data.filter(
+        pl.col("event_code").is_in([1]), pl.col("parameter") == phase
+    )
+    df_end = df_data.filter(
         pl.col("event_code").is_in([11]), pl.col("parameter") == phase
     ).rename(lambda cname: cname + "2")
+
+    # TODO: handle df_start empty or df_end empty
 
     # delete first row of df_end of start time > end time
     if df_start["dt"].item(0) > df_end["dt2"].item(0):
@@ -73,6 +119,8 @@ for phase in phases:
     if df_start["dt"].item(df_start.height - 1) > df_end["dt2"].item(df_end.height - 1):
         df_start = df_start.slice(0, df_start.height - 1)
 
+    # TODO: how does below still occur with above logic?
+    # Below handles an event starting not ending before hour ends and event not ending from previous hour
     if df_end.height > df_start.height:
         print("here 1")
         df_end = df_end.slice(1, df_start.height)
@@ -92,5 +140,6 @@ for phase in phases:
 
     df_holder.append(df_temp)
 
-df_fin: pl.DataFrame = pl.concat(df_holder)
-df_fin.sort(by="dt").write_csv("results.csv")
+
+df_fin: pl.DataFrame = pl.concat(df_holder).sort(by="dt")
+df_fin.write_csv("results.csv")
