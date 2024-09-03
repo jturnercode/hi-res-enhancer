@@ -27,14 +27,17 @@ path = env.DIRECTORY + locid
 dir_list = os.listdir(path)
 # print(dir_list)
 
-# TODO: filter out date/time
-# id_date = input("Enter date to process. ex. 2024-08-04: ")
-# id_hour = input("Enter start time (1400): ")
-# add_hours = input("Enter number of hours (default 0): ")
-# dir_list.index()
+# TODO: add options to just look at all files
+id_date = input("Enter date to process (ex. 2024-08-04): ")
+id_date = id_date.replace("-", "_")
 
+id_hour = input("Enter start time (ex. 1400): ")
+add_hours = input("Enter number of hours after start time: ")
 
-# quit()
+file_name = f"TRAF_{locid}_{id_date}_{id_hour}.csv"
+indx = dir_list.index(file_name)
+
+dir_list = dir_list[indx : indx + int(add_hours)]
 
 
 # ===========================
@@ -74,6 +77,7 @@ for file in dir_list:
 
     df_holder.append(df)
 
+# Concat all data
 df_data: pl.DataFrame = (
     pl.concat(df_holder).sort(by="dt")
     # Use series to map values from df to another df, great feature!!
@@ -100,7 +104,7 @@ phases = df_data.filter(pl.col("event_code").is_in([1]))["parameter"].unique()
 df_holder.clear()
 
 for phase in phases:
-    print(phase)
+    # print(phase)
 
     df_start = df_data.filter(
         pl.col("event_code").is_in([1]), pl.col("parameter") == phase
@@ -111,11 +115,11 @@ for phase in phases:
 
     # TODO: handle df_start empty or df_end empty
 
-    # delete first row of df_end of start time > end time
+    # Delete first row of df_end of start time > end time
     if df_start["dt"].item(0) > df_end["dt2"].item(0):
         df_end = df_end.slice(1, df_end.height)
 
-    # delete last row of df_start if start time > end time
+    # Delete last row of df_start if start time > end time
     if df_start["dt"].item(df_start.height - 1) > df_end["dt2"].item(df_end.height - 1):
         df_start = df_start.slice(0, df_start.height - 1)
 
