@@ -27,18 +27,29 @@ path = env.DIRECTORY + locid
 dir_list = os.listdir(path)
 # print(dir_list)
 
-# TODO: add options to just look at all files
+# Enter nothing to process all date/times
 id_date = input("Enter date to process (ex. 2024-08-04): ")
-id_date = id_date.replace("-", "_")
+if id_date != "":
+    id_date = id_date.replace("-", "_")
 
-id_hour = input("Enter start time (ex. 1400): ")
-add_hours = input("Enter number of hours after start time: ")
+    id_hour = input("Enter start time (ex. 1400): ")
+    if id_hour == "":
+        id_hour = "0000"
 
-file_name = f"TRAF_{locid}_{id_date}_{id_hour}.csv"
-indx = dir_list.index(file_name)
+    add_hours = input("Enter number of hours to process: ")
 
-dir_list = dir_list[indx : indx + int(add_hours)]
+    file_name = f"TRAF_{locid}_{id_date}_{id_hour}.csv"
+    idx = dir_list.index(file_name)
 
+    if add_hours == "":
+        idx_end = None
+    else:
+        idx_end = idx + int(add_hours)
+
+    dir_list = dir_list[idx:idx_end]
+
+
+print(dir_list)
 
 # ===========================
 #      Process Csv Data
@@ -87,6 +98,8 @@ df_data: pl.DataFrame = (
         )
     )
 )
+
+df_data.write_csv(f"Proc_{file}")
 # print(df_data)
 
 
