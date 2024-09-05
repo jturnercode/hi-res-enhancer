@@ -104,7 +104,7 @@ df_data.write_csv(f"Proc_{file}")
 
 
 # ================================================
-#            Process Paired Alarms
+#            Paired Event Code
 #
 #  alarms that have seperate event codes for on/off
 #
@@ -119,7 +119,7 @@ for ec_pair in ec_pairs:
     ec_params = df_data.filter(pl.col("event_code") == ec_pair[0])["parameter"].unique()
 
     for param in ec_params:
-        print(f"ec1: {ec_pair[0]}, ec2: {ec_pair[1]}: param: {param} ")
+        # print(f"ec1: {ec_pair[0]}, ec2: {ec_pair[1]}: param: {param} ")
 
         df_ec = df_data.filter(
             pl.col("event_code").is_in([ec_pair[0], ec_pair[1]]),
@@ -162,5 +162,41 @@ for ec_pair in ec_pairs:
 
         eventdf_holder.append(df_temp)
 
-df_fin: pl.DataFrame = pl.concat(eventdf_holder).sort(by="dt")
-df_fin.write_csv("results.csv")
+# ================================================
+#                Single Event Code
+#
+#
+#   Events that only have singel event code
+#
+# ================================================
+
+ec_singles = pl.read_csv("event_singles.csv")
+ec_singles = ec_singles["event_code"].to_list()
+
+
+# for ec_single in ec_singles:
+
+#     print(f"ec1: {ec_single[0]}, descriptor: {ec_single[1]} ")
+
+df_es = df_data.filter(pl.col("event_code").is_in(ec_singles))
+df_es2 = df_es.rename(lambda cname: cname + "2")
+
+
+df_temp = (
+    df_es.hstack(df_es2)
+    # added .1 seconds to be able to display on timeline chart, for now leave off
+    # .with_columns(pl.col("dt2") + pl.duration(milliseconds=100))
+    .with_columns(duration=pl.col("dt2") - pl.col("dt")).with_columns(
+        pl.col("duration").dt.total_milliseconds() / 1000
+    )
+)
+# df_temp.write_csv("temp.csv")
+
+eventdf_holder.append(df_temp)
+
+df_fin: pl.DataFrame = (
+    pl.concat(eventdf_holder)
+    .sort(by="dt")
+    .select(pl.lit(locid).alias("loc_id"), pl.all())
+)
+df_fin.write_csv(f"{locid}_{id_date}_{id_hour}_results.csv")
