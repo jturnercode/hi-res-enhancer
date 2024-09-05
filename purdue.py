@@ -52,9 +52,10 @@ if id_date != "":
 print(dir_list)
 
 # ===========================
-#      Process Csv Data
+#      Read Csv Data
 #
-#
+#   Create one df from selected files
+#   Add event descriptor to each event
 # ===========================
 
 df_holder = []
@@ -63,7 +64,6 @@ df_holder = []
 for file in dir_list:
     print(file)
     df = pl.read_csv(
-        # source="TRAF_00151_2024_08_22_0600.csv",
         source=path + "\\" + file,
         has_header=False,
         skip_rows=6,
@@ -99,112 +99,68 @@ df_data: pl.DataFrame = (
     )
 )
 
+# Write out data as is with descriptors, no pairing
 df_data.write_csv(f"Proc_{file}")
-# print(df_data)
-
-
-# ====================================
-#       Split Duration Calculation
-#
-#  begin green to Phase end redclear
-# ====================================
-
-phases = df_data.filter(pl.col("event_code").is_in([1]))["parameter"].unique()
-
-# test code
-# phases = [6]
-
-df_holder.clear()
-
-for phase in phases:
-    # print(phase)
-
-    df_start = df_data.filter(
-        pl.col("event_code").is_in([1]), pl.col("parameter") == phase
-    )
-
-    df_end = df_data.filter(
-        pl.col("event_code").is_in([11]), pl.col("parameter") == phase
-    ).rename(lambda cname: cname + "2")
-
-    # Skip event without matching
-    if df_start.is_empty() or df_end.is_empty():
-        print(f"Phase {phase} empty")
-        continue
-
-    # Delete first row of df_end of start time > end time
-    if df_start["dt"].item(0) > df_end["dt2"].item(0):
-        df_end = df_end.slice(1, df_end.height)
-
-    # Delete last row of df_start if start time > end time
-    if df_start["dt"].item(df_start.height - 1) > df_end["dt2"].item(df_end.height - 1):
-        df_start = df_start.slice(0, df_start.height - 1)
-
-    # TODO: how does below still occur with above logic?
-    # Below handles an event starting not ending before hour ends and event not ending from previous hour
-    if df_end.height > df_start.height:
-        print("here 1")
-        df_end = df_end.slice(1, df_start.height)
-    elif df_start.height > df_end.height:
-        print("here 2")
-        df_start = df_start.slice(0, df_end.height)
-
-    # print(df_start)
-    # print(df_end)
-    # quit()
-
-    df_temp = (
-        df_start.hstack(df_end)
-        .with_columns(duration=pl.col("dt2") - pl.col("dt"))
-        .with_columns(pl.col("duration").dt.total_milliseconds() / 1000)
-    )
-
-    df_holder.append(df_temp)
 
 
 # ================================================
-#                Preempt Processing
+#            Process Paired Alarms
 #
-#
-#
+#  alarms that have seperate event codes for on/off
 #
 # ================================================
 
-preempts = df_data.filter(pl.col("event_code").is_in([102]))["parameter"].unique()
+ec_pairs = pl.read_csv("event_pairs.csv").rows()
+eventdf_holder = []
 
 
-for preempt in preempts:
+for ec_pair in ec_pairs:
 
-    df_start = df_data.filter(
-        pl.col("event_code").is_in([102]), pl.col("parameter") == preempt
-    )
+    ec_params = df_data.filter(pl.col("event_code") == ec_pair[0])["parameter"].unique()
 
-    df_end = df_data.filter(
-        pl.col("event_code").is_in([104]), pl.col("parameter") == preempt
-    ).rename(lambda cname: cname + "2")
+    for param in ec_params:
+        print(f"ec1: {ec_pair[0]}, ec2: {ec_pair[1]}: param: {param} ")
 
-    # TODO: can we add start or end time for unpaired events
-    # Skip event without matching
-    if df_start.is_empty() or df_end.is_empty():
-        print(f"Preempt {preempt} empty")
-        continue
+        df_ec = df_data.filter(
+            pl.col("event_code").is_in([ec_pair[0], ec_pair[1]]),
+            pl.col("parameter") == param,
+        )
+        # df_ec.write_csv("df_ec1.csv")
 
-    # Delete first row of df_end of start time > end time
-    if df_start["dt"].item(0) > df_end["dt2"].item(0):
-        df_end = df_end.slice(1, df_end.height)
+        df_ec = df_ec.filter(
+            pl.col("event_code") != pl.col("event_code").shift(1, fill_value=ec_pair[1])
+        )
 
-    # Delete last row of df_start if start time > end time
-    if df_start["dt"].item(df_start.height - 1) > df_end["dt2"].item(df_end.height - 1):
-        df_start = df_start.slice(0, df_start.height - 1)
+        # df_ec.write_csv("df_ec2.csv")
+        # print(df_ec)
 
-    df_temp = (
-        df_start.hstack(df_end)
-        .with_columns(duration=pl.col("dt2") - pl.col("dt"))
-        .with_columns(pl.col("duration").dt.total_milliseconds() / 1000)
-    )
+        # Delete last row if ends with start pair
+        if df_ec["event_code"].item(df_ec.height - 1) == ec_pair[0]:
+            df_ec = df_ec.slice(0, df_ec.height - 1)
 
-    df_holder.append(df_temp)
+        df_start = df_ec.filter(
+            pl.col("event_code") == ec_pair[0], pl.col("parameter") == param
+        )
 
+        df_end = df_ec.filter(
+            pl.col("event_code") == ec_pair[1], pl.col("parameter") == param
+        ).rename(lambda cname: cname + "2")
 
-df_fin: pl.DataFrame = pl.concat(df_holder).sort(by="dt")
+        # If Event does not have pair, skip without matching
+        if df_start.is_empty() or df_end.is_empty():
+            print(f"ec1: {ec_pair[0]}, ec2: {ec_pair[1]}: param: {param} ")
+            continue
+
+        # print(df_start)
+        # print(df_end)
+
+        df_temp = (
+            df_start.hstack(df_end)
+            .with_columns(duration=pl.col("dt2") - pl.col("dt"))
+            .with_columns(pl.col("duration").dt.total_milliseconds() / 1000)
+        )
+
+        eventdf_holder.append(df_temp)
+
+df_fin: pl.DataFrame = pl.concat(eventdf_holder).sort(by="dt")
 df_fin.write_csv("results.csv")
