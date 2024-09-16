@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 polars = "*"
+fastapi = {extras = ["standard"], version = "*"}
 
 [dev-packages]
 
