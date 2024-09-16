@@ -1,6 +1,5 @@
 import os
 import polars as pl
-import env
 
 
 # ===========================
@@ -23,7 +22,7 @@ id_input = input("ENTER Intersection ID: ")
 locid = ((5 - len(id_input)) * "0") + id_input
 
 # locate directory with files and create list
-path = env.DIRECTORY + locid
+path = os.getenv("DIRECTORY") + locid
 dir_list = os.listdir(path)
 # print(dir_list)
 
