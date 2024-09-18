@@ -9,7 +9,7 @@ import polars as pl
 # ===========================
 
 # event codes
-ec = pl.read_csv(source="event_codes.csv")
+ec = pl.read_csv(source="api/event_codes.csv")
 
 
 # ===========================
@@ -109,7 +109,7 @@ df_data.write_csv(f"Proc_{file}")
 #
 # ================================================
 
-ec_pairs = pl.read_csv("event_pairs.csv").rows()
+ec_pairs = pl.read_csv("api/event_pairs.csv").rows()
 eventdf_holder = []
 
 
@@ -169,7 +169,7 @@ for ec_pair in ec_pairs:
 #
 # ================================================
 
-ec_singles = pl.read_csv("event_singles.csv")
+ec_singles = pl.read_csv("api/event_singles.csv")
 ec_singles = ec_singles["event_code"].to_list()
 
 
@@ -198,4 +198,7 @@ df_fin: pl.DataFrame = (
     .sort(by="dt")
     .select(pl.lit(locid).alias("loc_id"), pl.all())
 )
-df_fin.write_csv(f"{locid}_{id_date}_{id_hour}_results.csv")
+
+print(df_fin.schema)
+# TODO: write without T in datetime, same for api
+df_fin.write_csv(f"./api/{locid}_{id_date}_{id_hour}_results.csv")

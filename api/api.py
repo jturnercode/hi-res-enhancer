@@ -14,7 +14,7 @@ app = FastAPI()
 # ===========================
 
 # event codes
-ec = pl.read_csv(source="event_codes.csv")
+ec = pl.read_csv(source="api/event_codes.csv")
 
 
 @app.get("/purdue")
@@ -46,7 +46,7 @@ async def get_purdue(
     #
     # ================================================
 
-    ec_pairs = pl.read_csv("event_pairs.csv").rows()
+    ec_pairs = pl.read_csv("api/event_pairs.csv").rows()
     eventdf_holder = []
 
     for ec_pair in ec_pairs:
@@ -108,7 +108,7 @@ async def get_purdue(
     #
     # ================================================
 
-    ec_singles = pl.read_csv("event_singles.csv")
+    ec_singles = pl.read_csv("api/event_singles.csv")
     ec_singles = ec_singles["event_code"].to_list()
 
     # for ec_single in ec_singles:
