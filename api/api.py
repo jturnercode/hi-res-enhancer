@@ -20,7 +20,7 @@ ec = pl.read_csv(source="event_codes.csv")
 @app.get("/purdue")
 async def get_purdue(
     locid: str, date: str, time: str | None = None, addhrs: int | None = None
-):
+) -> StreamingResponse:
 
     dir_list, path = utils.filter_directory(locid, date, time, addhrs)
 

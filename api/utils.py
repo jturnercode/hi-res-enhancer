@@ -11,8 +11,9 @@ def filter_directory(
     path = os.getenv("DIRECTORY") + locid
     dir_list = os.listdir(path)
 
-    if date != None:
-        date = date.replace("-", "_")
+    # format date to format in filename
+    date = date.replace("-", "_")
+    date = date.replace("/", "_")
 
     if time == None:
         time = "0000"
