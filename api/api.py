@@ -22,45 +22,13 @@ async def get_purdue(
     locid: str, date: str, time: str | None = None, addhrs: int | None = None
 ) -> StreamingResponse:
 
+    # retun filtered list of files from directory
     dir_list, path = utils.filter_directory(locid, date, time, addhrs)
 
-    # ===========================
-    #      Read Csv Data
-    #
-    #   Create one df from selected files
-    #   Add event descriptor to each event
-    # ===========================
+    # read files and add event descriptors
+    df_holder: list[pl.DataFrame] = utils.add_event_descriptors(dir_list, path)
 
-    df_holder = []
-
-    for file in dir_list:
-        print(file)
-        df = pl.read_csv(
-            source=path + "\\" + file,
-            has_header=False,
-            skip_rows=6,
-            new_columns=["dt", "event_code", "parameter"],
-        )
-
-        # ===========================
-        #      Clean/Format data
-        #
-        #   add event descriptor names
-        # ===========================
-
-        df = df.with_columns(
-            pl.col("dt").str.to_datetime(r"%-m/%d/%Y %H:%M:%S%.3f"),
-            pl.col("event_code").str.replace_all(" ", ""),
-            pl.col("parameter").str.replace_all(" ", ""),
-            # location_id=pl.lit(locid),
-        ).with_columns(
-            pl.col("event_code").str.to_integer(),
-            pl.col("parameter").str.to_integer(),
-        )
-
-        df_holder.append(df)
-
-    # Concat all data
+    # Concat list of dataframes to one dataframe for processing
     df_data: pl.DataFrame = (
         pl.concat(df_holder).sort(by="dt")
         # Use series to map values from df to another df, great feature!!

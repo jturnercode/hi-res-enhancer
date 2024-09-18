@@ -1,4 +1,5 @@
 import os
+import polars as pl
 
 
 def filter_directory(
@@ -28,3 +29,44 @@ def filter_directory(
 
     dir_list = dir_list[idx:idx_end]
     return dir_list, path
+
+
+def add_event_descriptors(dir_list: list, path: str):
+
+    # ===========================
+    #      Read Csv Data
+    #
+    #   Create one df from selected files
+    #   Add event descriptor to each event
+    # ===========================
+
+    df_holder = []
+
+    for file in dir_list:
+        print(file)
+        df = pl.read_csv(
+            source=path + "\\" + file,
+            has_header=False,
+            skip_rows=6,
+            new_columns=["dt", "event_code", "parameter"],
+        )
+
+        # ===========================
+        #      Clean/Format data
+        #
+        #   add event descriptor names
+        # ===========================
+
+        df = df.with_columns(
+            pl.col("dt").str.to_datetime(r"%-m/%d/%Y %H:%M:%S%.3f"),
+            pl.col("event_code").str.replace_all(" ", ""),
+            pl.col("parameter").str.replace_all(" ", ""),
+            # location_id=pl.lit(locid),
+        ).with_columns(
+            pl.col("event_code").str.to_integer(),
+            pl.col("parameter").str.to_integer(),
+        )
+
+        df_holder.append(df)
+
+    return df_holder
