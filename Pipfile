@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 polars = "*"
 fastapi = {extras = ["standard"], version = "*"}
+adbc-driver-postgresql = "*"
+pyarrow = "*"
 
 [dev-packages]
 
