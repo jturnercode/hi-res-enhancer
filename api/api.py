@@ -96,6 +96,10 @@ def process_hires(
         pl.concat(eventdf_holder)
         .sort(by="dt")
         .select(pl.lit(locid).alias("loc_id"), pl.all())
+    ).with_columns(
+        pl.col("dt").dt.strftime(r"%Y-%m-%d %H:%M:%S%.3f"),
+        pl.col("dt2").dt.strftime(r"%Y-%m-%d %H:%M:%S%.3f"),
+        pl.col("duration").round(1),
     )
 
     # df_fin.write_csv("api/test_results.csv")
@@ -125,7 +129,7 @@ async def get_purdue(
 @app.get("/timeline_viz")
 async def get_purdue(
     locid: str, date: str, time: str | None = None, addhrs: int | None = None
-) -> dict[dict]:
+) -> dict:
 
     df_hres = process_hires(locid=locid, date=date, time=time, addhrs=addhrs)
 
@@ -195,6 +199,16 @@ async def get_purdue(
 
 @app.get("/hiresgrid")
 async def get_hires_grid(
-    locid: str, date: str, time: str | None = None, addhrs: int | None = None
+    locid: str,
+    date: str,
+    time: str | None = "0000",
+    addhrs: str | None = "1",
 ) -> list[dict]:
-    pass
+
+    df_hres = process_hires(locid=locid, date=date, time=time, addhrs=addhrs)
+
+    print(df_hres.columns)
+    # TODO: adjust datetime columns, remove T and show only to tenths place
+    # TODO: also adjust duration to one thenth place?
+
+    return df_hres.to_dicts()
