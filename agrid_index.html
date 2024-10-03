@@ -15,17 +15,22 @@
   </head>
   <body>
     <h1 class="title">Hi-Res Data</h1>
+
+    <div id="noDataNotification" class="notification is-warning is-hidden">
+      <button class="delete"></button>
+      <p>No Data found for submitted location, date and time.</p>
+    </div>
     <!-- TODO: add button to download csv data -->
 
-    <!-- TODO: add date and time controls -->
     <!-- TODO: option to remove veh detector data from table -->
 
     <!-- TODO: fix space from edge of screen? bulma? -->
-    <div class="columns">
+    <div class="columns is-vcentered">
       <!-- Location -->
       <div class="field column is-narrow">
         <label class="label">Location</label>
         <div class="control">
+          <!-- ***TODO: add text search to select-->
           <div class="select">
             <select id="locations" name="Location" class="validate">
               <option value="">Select Location</option>
@@ -62,8 +67,11 @@
         </div>
       </div>
 
-      <div class="column">
-        <button id="getdataBtn" class="button is-info">Get Data</button>
+      <div class="column is-narrow">
+        <!-- TODO: align button with bottom div? -->
+        <div class="control">
+          <button id="getdataBtn" class="button is-info">Get Data</button>
+        </div>
       </div>
     </div>
     <!-- TODO: how to use 100% height or similar width settings -->

@@ -2,6 +2,7 @@ const locationSel = document.getElementById("locations");
 const dtimeInput = document.getElementById("dtimeInput");
 const addhrsInput = document.getElementById("addhrs");
 const getdataBtn = document.getElementById("getdataBtn");
+const noDataNotification = document.getElementById("noDataNotification");
 // const addhrsSel = document.getElementById("addhrs");
 
 /**============================================
@@ -112,22 +113,43 @@ const gridOptions = {
   },
 };
 
-// NOTE: setup the grid after the page has finished loading
-// Need this for my async fetch calls to update grid
-document.addEventListener("DOMContentLoaded", function () {
-  var gridDiv = document.querySelector("#grid");
-  gridApi = agGrid.createGrid(gridDiv, gridOptions);
-});
-
 /**============================================
  **               Event Listners
  *=============================================**/
 let gridApi;
 
-// locationSel.addEventListener("change", async function () {
-getdataBtn.addEventListener("click", async function () {
-  const f = await fetch_griddata();
-  // console.log(f);
+document.addEventListener("DOMContentLoaded", function () {
+  /**======================
+   *    Create AG Grid
+   *========================**/
+  // NOTE: setup the grid after the page has finished loading
+  // Need this for my async fetch calls to update grid
+  var gridDiv = document.querySelector("#grid");
+  gridApi = agGrid.createGrid(gridDiv, gridOptions);
 
-  gridApi.setGridOption("rowData", f);
+  /**======================
+   *    Notification Banner
+   *========================**/
+  // Click event to close notifications
+  (document.querySelectorAll(".notification") || []).forEach(
+    ($notification) => {
+      $notification.addEventListener("click", () => {
+        $notification.classList.add("is-hidden");
+      });
+    }
+  );
+
+  /**======================
+   *    Get data Button
+   *========================**/
+  getdataBtn.addEventListener("click", async function () {
+    const f = await fetch_griddata();
+    // console.log(f);
+    if (Object.keys(f).length === 0) {
+      noDataNotification.classList.remove("is-hidden");
+    } else {
+      noDataNotification.classList.add("is-hidden");
+    }
+    gridApi.setGridOption("rowData", f);
+  });
 });

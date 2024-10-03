@@ -22,7 +22,7 @@ app.add_middleware(
 # ===========================
 #  * Load Event code data
 # ===========================
-
+# TODO: save to db to deploy on server or package in docker
 # event codes with descriptions
 ec = pl.read_csv(source="api/event_codes.csv")
 # event code pairs
@@ -42,7 +42,7 @@ async def get_locations() -> list[dict]:
     for select dropdown"""
 
     qry = """SELECT atms_id, name FROM intersection"""
-    df = pl.read_database_uri(query=qry, uri=uri, engine="adbc")
+    df = pl.read_database_uri(query=qry, uri=uri, engine="adbc").sort("name")
 
     # NOTE: anotther way to acheive results
     # w/o list, only dictionary
@@ -62,6 +62,8 @@ def process_hires(
 
     # retun filtered list of files from directory
     dir_list, path = utils.filter_directory(locid, date, time, addhrs)
+    if not dir_list:
+        return pl.DataFrame()
 
     # read files and add event descriptors
     df_holder: list[pl.DataFrame] = utils.add_event_descriptors(dir_list, path)
@@ -145,7 +147,7 @@ async def get_purdue(
         "Yellow Clr": (8, 9, "#FEB019"),
         "Red Clr": (10, 11, "#FF4560"),
     }
-
+    # TODO: how do i get this info for each intersection as ring structures vary?
     phases = [
         (1, "R1"),
         (2, "R1"),
@@ -206,9 +208,6 @@ async def get_hires_grid(
 ) -> list[dict]:
 
     df_hres = process_hires(locid=locid, date=date, time=time, addhrs=addhrs)
-
-    print(df_hres.columns)
-    # TODO: adjust datetime columns, remove T and show only to tenths place
-    # TODO: also adjust duration to one thenth place?
+    # print(df_hres.columns)
 
     return df_hres.to_dicts()
