@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
+    <!-- ***css loaded after aggrid if rowclassrules used*** -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
+    />
+    <link rel="stylesheet" href="css/ag.css" />
+
+    <title>AG grid</title>
+  </head>
+  <body>
+    <h1 class="title">Hi-Res Data</h1>
+    <!-- TODO: add button to download csv data -->
+
+    <!-- TODO: add date and time controls -->
+    <!-- TODO: option to remove veh detector data from table -->
+
+    <!-- TODO: fix space from edge of screen? bulma? -->
+    <div class="columns">
+      <!-- Location -->
+      <div class="field column is-narrow">
+        <label class="label">Location</label>
+        <div class="control">
+          <div class="select">
+            <select id="locations" name="Location" class="validate">
+              <option value="">Select Location</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Datetime -->
+      <div class="field column is-narrow">
+        <label class="label" for="EventDate">Starting Datetime</label>
+        <div class="control">
+          <!-- TODO: default value to today -->
+          <input
+            class="input validate"
+            type="datetime-local"
+            name="EventDate"
+            value="2024-10-01 00:00"
+            id="dtimeInput"
+          />
+        </div>
+      </div>
+
+      <!-- Additional Hours -->
+      <div class="field column is-narrow">
+        <label class="label" for="addhrs">Additional Hours</label>
+        <div class="control">
+          <input id="addhrs" class="input" type="text" value="1" />
+
+          <!-- not used maybe switch back to dropdown? vs text input -->
+          <!-- <div class="select">
+            <select id="addhrs" name="addHrs" class="validate"></select>
+          </div> -->
+        </div>
+      </div>
+
+      <div class="column">
+        <button id="getdataBtn" class="button is-info">Get Data</button>
+      </div>
+    </div>
+    <!-- TODO: how to use 100% height or similar width settings -->
+    <div id="grid" class="ag-theme-quartz" style="height: 700px"></div>
+    <script src="js/agrid.js"></script>
+  </body>
+</html>
