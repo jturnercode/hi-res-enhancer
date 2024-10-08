@@ -12,11 +12,22 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5500"],
+    # TODO: set correct origins for production
+    # allow_origins=["http://127.0.0.1:5500"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ================================================
+#                Test Endpoint
+# ================================================
+
+
+@app.get("/")
+async def root():
+    return {"message": "Hello, Root!"}
 
 
 # ===========================

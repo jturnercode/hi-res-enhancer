@@ -10,7 +10,7 @@ def filter_directory(
         locid = ((5 - len(locid)) * "0") + locid
 
         # locate directory with files and create list
-        path = os.getenv("DIRECTORY") + locid
+        path = os.getenv("DIRECTORY") + "Ctrl" + locid
         dir_list = os.listdir(path)
 
         # format date to format in filename
@@ -49,7 +49,8 @@ def add_event_descriptors(dir_list: list, path: str):
     for file in dir_list:
         print(file)
         df = pl.read_csv(
-            source=path + "\\" + file,
+            # source=path + "\\" + file,
+            source=path + "/" + file,
             has_header=False,
             skip_rows=6,
             new_columns=["dt", "event_code", "parameter"],
