@@ -1,3 +1,5 @@
+import { API_URL } from "./env.js";
+
 const locationSel = document.getElementById("locations");
 const dtimeInput = document.getElementById("dtimeInput");
 const addhrsInput = document.getElementById("addhrs");
@@ -9,20 +11,31 @@ const noDataNotification = document.getElementById("noDataNotification");
  * *     Fetch location dropdown info
  *=============================================**/
 async function fetchLocids() {
-  let response = await fetch("http://127.0.0.1:8000/form_locids", {
-    credentials: "include",
-  });
-  locObject = await response.json();
-  // console.log(locObject);
+  // let response = await fetch("http://127.0.0.1:8000/form_locids", {
+  try {
+    let response = await fetch(
+      `${API_URL}/form_locids`
+      // NOTE: allow origins * cannot be used with credential include
+      // , {credentials: "include", }
+    );
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
 
-  // TODO: how do make below code work? worked in sign db
-  // for (let loc in locObject) {
+    locObject = await response.json();
+    // console.log(locObject);
 
-  // add data to locations dropdown
-  for (const [k, v] of Object.entries(locObject)) {
-    // console.log(k, v);
-    let newOption = new Option(v.name, v.atms_id);
-    locationSel.add(newOption);
+    // TODO: how do make below code work? worked in sign db
+    // for (let loc in locObject) {
+
+    // add data to locations dropdown
+    for (const [k, v] of Object.entries(locObject)) {
+      // console.log(k, v);
+      let newOption = new Option(v.name, v.atms_id);
+      locationSel.add(newOption);
+    }
+  } catch (error) {
+    console.error(error.message);
   }
 }
 fetchLocids();
@@ -47,12 +60,9 @@ async function fetch_griddata() {
   let dt = dtimeInput.value.split("T");
 
   let response = await fetch(
-    `http://127.0.0.1:8000/hiresgrid?locid=${locationSel.value}&date=${
+    `${API_URL}/hiresgrid?locid=${locationSel.value}&date=${
       dt[0]
-    }&time=${dt[1].replace(":", "")}&addhrs=${addhrsInput.value}`,
-    {
-      credentials: "include",
-    }
+    }&time=${dt[1].replace(":", "")}&addhrs=${addhrsInput.value}`
   );
 
   // list of dictionaries
