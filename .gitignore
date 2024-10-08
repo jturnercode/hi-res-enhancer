@@ -11,6 +11,7 @@ controller_old
 
 # env & config files
 .env
+env.js
 env.py
 !__init__.py
 
