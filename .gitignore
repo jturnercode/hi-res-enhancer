@@ -13,6 +13,7 @@ controller_old
 .env
 env.js
 env.py
+cifs*
 !__init__.py
 
 # Python
