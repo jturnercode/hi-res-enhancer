@@ -7,6 +7,12 @@ const getdataBtn = document.getElementById("getdataBtn");
 const noDataNotification = document.getElementById("noDataNotification");
 // const addhrsSel = document.getElementById("addhrs");
 
+/**======================
+ *    Set Datetime Input
+ * default time
+ *========================**/
+dtimeInput.value = new Date().toISOString().split("T")[0] + " 00:00";
+
 /**============================================
  * *     Fetch location dropdown info
  *=============================================**/
@@ -57,6 +63,7 @@ fetchLocids();
 async function fetch_griddata() {
   // TODO: ***add exception catch, return for ag grid
 
+  // default datetime has 'T' format; remove and split date/hour
   let dt = dtimeInput.value.split("T");
 
   let response = await fetch(

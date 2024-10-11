@@ -31,6 +31,8 @@ docker run --rm -it -v <name_of_volume>:</directory/inContainer/toMountTo> --env
 
 ## TODO
 
+[ ] **Create Script to store all data in new location**
+[ ] Button to download data
 [ ] Add timeline visual
 [ ] Highlight critical faults like mmu flash, stop time, etc  
 [ ] Allow user to make table or visual full screen  
