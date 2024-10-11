@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
     <!-- ***css loaded after aggrid if rowclassrules used*** -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
-    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css" />
     <link rel="stylesheet" href="css/ag.css" />
 
-    <title>AG grid</title>
+    <title>Hi Resolution Data</title>
   </head>
+
   <body>
     <h1 class="title">Hi-Res Data</h1>
 
@@ -44,13 +43,8 @@
         <label class="label" for="EventDate">Starting Datetime</label>
         <div class="control">
           <!-- TODO: default value to today -->
-          <input
-            class="input validate"
-            type="datetime-local"
-            name="EventDate"
-            value="2024-10-01 00:00"
-            id="dtimeInput"
-          />
+          <input class="input validate" type="datetime-local" name="EventDate" value="2024-10-01 00:00"
+            id="dtimeInput" />
         </div>
       </div>
 
@@ -75,7 +69,9 @@
       </div>
     </div>
     <!-- TODO: how to use 100% height or similar width settings -->
+    <!-- TODO: expand chart full screen if user want only to see table -->
     <div id="grid" class="ag-theme-quartz" style="height: 700px"></div>
-    <script src="js/agrid.js"></script>
+    <script type="module" src="js/agrid.js"></script>
   </body>
+
 </html>
