@@ -22,7 +22,7 @@ async function fetchLocids() {
       throw new Error(`Response status: ${response.status}`);
     }
 
-    locObject = await response.json();
+    let locObject = await response.json();
     // console.log(locObject);
 
     // TODO: how do make below code work? worked in sign db
