@@ -11,13 +11,15 @@ const noDataNotification = document.getElementById("noDataNotification");
  *    Set Datetime Input
  * default time
  *========================**/
-dtimeInput.value = new Date().toISOString().split("T")[0] + " 00:00";
+let cdate = new Date();
+dtimeInput.value = `${cdate.getFullYear()}-${
+  cdate.getMonth() + 1
+}-${cdate.getDate()} 00:00`;
 
 /**============================================
  * *     Fetch location dropdown info
  *=============================================**/
 async function fetchLocids() {
-  // let response = await fetch("http://127.0.0.1:8000/form_locids", {
   try {
     let response = await fetch(
       `${API_URL}/form_locids`
