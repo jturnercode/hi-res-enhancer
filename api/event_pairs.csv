@@ -1,0 +1,21 @@
+event_start,event_end,event_description
+1,11,Phase Split
+1,7,Phase Green
+8,9,Phase Yellow
+10,11,Phase Red
+21,22,Walk Time
+22,23,Ped Clearance Time
+32,33,FYA Permissive Period
+61,65,Overlap On
+61,63,Overlap Green
+63,64,Overlap Yellow
+64,65,Overlap Red
+82,81,Detector On/Off
+90,89,Ped Detector On/Off
+182,184,Power Failure
+102,104,Preempt On
+106,107,Preempt Track Clear
+107,111,Preempt Dwell
+111,104,Preempt Exit
+91,92,Ped Detector Failure
+84,83,Veh Detector Failure
