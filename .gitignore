@@ -8,6 +8,10 @@ _*
 gaps
 controller_old
 
+# project files
+!requirements.txt
+!event*.csv
+
 
 # env & config files
 .env
