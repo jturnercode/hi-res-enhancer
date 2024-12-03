@@ -6,14 +6,27 @@ const addhrsInput = document.getElementById("addhrs");
 const getdataBtn = document.getElementById("getdataBtn");
 const noDataNotification = document.getElementById("noDataNotification");
 
+/**=======================
+ *      Util functions
+ *
+ *========================**/
+
+// USED TO ADD ZERO TO DATE FUNCS LIKE getDate()
+function addzero(int) {
+  if (int < 10) {
+    return "0" + int.toString();
+  }
+  return int.toString();
+}
+
 /**======================
  *    Set Datetime Input
  * default time
  *========================**/
 let cdate = new Date();
-dtimeInput.value = `${cdate.getFullYear()}-${
+dtimeInput.value = `${cdate.getFullYear()}-${addzero(
   cdate.getMonth() + 1
-}-${cdate.getDate()} 00:00`;
+)}-${addzero(cdate.getDate())}T00:00`;
 
 /**============================================
  * *     Fetch location dropdown info
