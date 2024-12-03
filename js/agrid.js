@@ -5,7 +5,6 @@ const dtimeInput = document.getElementById("dtimeInput");
 const addhrsInput = document.getElementById("addhrs");
 const getdataBtn = document.getElementById("getdataBtn");
 const noDataNotification = document.getElementById("noDataNotification");
-// const addhrsSel = document.getElementById("addhrs");
 
 /**======================
  *    Set Datetime Input
@@ -31,14 +30,9 @@ async function fetchLocids() {
     }
 
     let locObject = await response.json();
-    // console.log(locObject);
-
-    // TODO: how do make below code work? worked in sign db
-    // for (let loc in locObject) {
 
     // add data to locations dropdown
     for (const [k, v] of Object.entries(locObject)) {
-      // console.log(k, v);
       let newOption = new Option(v.name, v.atms_id);
       locationSel.add(newOption);
     }
@@ -46,17 +40,6 @@ async function fetchLocids() {
     console.error(error.message);
   }
 }
-fetchLocids();
-
-//
-// function addHrs() {
-//   // add data to addHrs Select
-//   for (let i = 1; i <= 32; i++) {
-//     let newOption = new Option(i, i);
-//     addhrsSel.add(newOption);
-//   }
-// }
-// addHrs();
 
 /**============================================
  *               Fetch grid data function
@@ -77,7 +60,15 @@ async function fetch_griddata() {
   // list of dictionaries
   let gridDataObj = await response.json();
 
-  return gridDataObj;
+  // CHECK IF DATA WAS RETURNED; IF NOT SHOW NOTIFICATION BANNER
+  if (Object.keys(gridDataObj).length === 0) {
+    noDataNotification.classList.remove("is-hidden");
+  } else {
+    noDataNotification.classList.add("is-hidden");
+  }
+
+  // FILL AG GRID WITH DATA
+  gridApi.setGridOption("rowData", gridDataObj);
 }
 
 /**============================================
@@ -97,14 +88,14 @@ const gridOptions = {
   // Column Definitions: Defines the columns to be displayed.
   columnDefs: [
     { field: "loc_id", headerName: "LocID" },
-    { field: "dt", headerName: "Datetime" },
+    { field: "dt", headerName: "Datetime 1" },
     { field: "event_code", headerName: "Event Code 1" },
     { field: "parameter", headerName: "Parameter 1" },
-    { field: "event_descriptor", headerName: "Event Descriptor" },
+    { field: "event_descriptor", headerName: "Event Descriptor 1" },
     { field: "dt2", headerName: "Datetime 2" },
     { field: "event_code2", headerName: "Event Code 2" },
     { field: "parameter2", headerName: "Parameter 2" },
-    { field: "event_descriptor2", headerName: "Event Descriptor" },
+    { field: "event_descriptor2", headerName: "Event Descriptor 2" },
     { field: "duration" },
   ],
 
@@ -159,16 +150,29 @@ document.addEventListener("DOMContentLoaded", function () {
   );
 
   /**======================
-   *    Get data Button
+   *    Get Data Button
    *========================**/
   getdataBtn.addEventListener("click", async function () {
-    const f = await fetch_griddata();
-    // console.log(f);
-    if (Object.keys(f).length === 0) {
-      noDataNotification.classList.remove("is-hidden");
-    } else {
-      noDataNotification.classList.add("is-hidden");
-    }
-    gridApi.setGridOption("rowData", f);
+    await fetch_griddata();
   });
 });
+
+// AFTER ALL SCRIPT AND WINDOWS LOADED;
+window.onload = async function () {
+  // **onload WAITs TO LOAD LOCATIONS IN Locations SELECT ELEMENT
+  await fetchLocids();
+
+  // IF QUERY PARAMETERS PASSED (USED FOR LINKS SET PERIOD/LOCAITON)
+  let searchParams = new URLSearchParams(window.location.search);
+  if (searchParams.size > 0) {
+    console.log(searchParams);
+    console.log(searchParams.get("locid"));
+    console.log(dtimeInput.value);
+
+    locationSel.value = searchParams.get("locid");
+    // dtimeInput.value = searchParams.get("date");
+    dtimeInput.value = "2024-11-25T02:00";
+    addhrsInput.value = 1;
+    fetch_griddata();
+  }
+};
