@@ -211,17 +211,16 @@ window.onload = async function () {
   // **onload WAITs TO LOAD LOCATIONS IN Locations SELECT ELEMENT
   await fetchLocids();
 
-  // IF QUERY PARAMETERS PASSED (USED FOR LINKS SET PERIOD/LOCAITON)
+  // IF QUERY PARAMETERS PASSED, SET location and datetimes
+  // USED for automated links that may be triggered by other apps
   let searchParams = new URLSearchParams(window.location.search);
-  if (searchParams.size > 0) {
-    console.log(searchParams);
-    console.log(searchParams.get("locid"));
-    console.log(dtimeInput.value);
 
+  if (searchParams.size > 0) {
+    //  Set values with .get() method
     locationSel.value = searchParams.get("locid");
-    // dtimeInput.value = searchParams.get("date");
-    dtimeInput.value = "2024-11-25T02:00";
-    addhrsInput.value = 1;
+    start_dtInput.value = searchParams.get("startdt");
+    end_dtInput.value = searchParams.get("enddt");
+
     fetch_griddata();
   }
 };
