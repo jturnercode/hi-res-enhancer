@@ -1,36 +1,59 @@
 import os
+from datetime import datetime
 import polars as pl
 
 
-def filter_directory(
-    locid: str, date: str, time: str | None = None, addhrs: int | None = None
-):
+def format_dt(dt: datetime) -> str:
+    """Return date and hr in filename format form
+
+    Args:
+        dt (datetime): datetime
+
+    Returns:
+        str: date & hour in hires filename format
+    """
+    date = str(dt.date()).replace("-", "_")
+
+    hr = dt.hour * 100
+    if hr == 0:
+        hr = "0000"
+    elif hr < 1000:
+        hr = "0" + str(hr)
+    else:
+        hr = str(hr)
+
+    return date, hr
+
+
+def filter_directory(locid: str, sdt: datetime, edt: datetime):
 
     try:
+        # return locid in filename format
         locid = ((5 - len(locid)) * "0") + locid
 
         # locate directory with files and create list
         path = os.getenv("DIRECTORY") + "Ctrl" + locid
         dir_list = os.listdir(path)
 
-        # format date to format in filename
-        date = date.replace("-", "_")
-        date = date.replace("/", "_")
+        # format datetime to filename date & hr format
+        sdate, stime = format_dt(sdt)
+        edate, etime = format_dt(edt)
 
-        if time == None:
-            time = "0000"
+        start_file_name = f"TRAF_{locid}_{sdate}_{stime}.csv"
+        idx = dir_list.index(start_file_name)
 
-        file_name = f"TRAF_{locid}_{date}_{time}.csv"
-        idx = dir_list.index(file_name)
+        end_file_name = f"TRAF_{locid}_{edate}_{etime}.csv"
+        idx_end = dir_list.index(end_file_name)
 
-        if addhrs == None:
-            idx_end = None
-        else:
-            idx_end = idx + int(addhrs)
+        # **Add hr if minute in end datetime
+        if edt.minute > 0:
+            idx_end += 1
+        # print(idx, idx_end)
 
         dir_list = dir_list[idx:idx_end]
 
-    except:
+    except Exception as err:
+        print(err)
         return [], path
     return dir_list, path
 

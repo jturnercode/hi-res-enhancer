@@ -20,8 +20,14 @@ function addzero(int) {
   return int.toString();
 }
 
-//ADD HRS TO DATESTRING (2024-12-25T00:00)
-// RETURNS ISO STRING DATE TO MINUTE PRECISION FOR SELECT INPUT
+/**
+ * Adds hours to datestring.
+ * Returns Local ISO datetime to minute precision, typ used for date select input
+ *
+ * @param {string} datestring - format (2024-12-25T00:00)
+ * @param {string} hr - number of hours to add
+ * @returns {string} ISO datetime to minute precision
+ */
 function addHrs(datestring, hr) {
   const utc_date_obj = new Date(datestring);
   const tz_offset_ms = utc_date_obj.getTimezoneOffset() * 60 * 1000;
@@ -77,12 +83,11 @@ async function fetch_griddata() {
   // TODO: ***add exception catch, return for ag grid
 
   // default datetime has 'T' format; remove and split date/hour
-  let dt = dtimeInput.value.split("T");
+  let sdt = start_dtInput.value.replace("T", " ");
+  let edt = end_dtInput.value.replace("T", " ");
 
   let response = await fetch(
-    `${API_URL}/hiresgrid?locid=${locationSel.value}&date=${
-      dt[0]
-    }&time=${dt[1].replace(":", "")}&addhrs=${addhrsInput.value}`
+    `${API_URL}/hiresgrid?locid=${locationSel.value}&startdt=${sdt}&enddt=${edt}`
   );
 
   // list of dictionaries

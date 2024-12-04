@@ -1,5 +1,5 @@
-import io
-import os
+import io, os, math
+from datetime import datetime
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,8 +13,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     # TODO: set correct origins for production
-    # allow_origins=["http://127.0.0.1:5500"],
-    allow_origins=["*"],
+    allow_origins=["http://127.0.0.1:5500"],
+    # allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -67,12 +67,12 @@ async def get_locations() -> list[dict]:
 # ================================================
 
 
-def process_hires(
-    locid: str, date: str, time: str | None = None, addhrs: int | None = None
-) -> pl.DataFrame:
+def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
 
-    # retun filtered list of files from directory
-    dir_list, path = utils.filter_directory(locid, date, time, addhrs)
+    # return filtered list of files from directory
+    dir_list, path = utils.filter_directory(locid, sdate, edate)
+    print(dir_list)
+
     if not dir_list:
         return pl.DataFrame()
 
@@ -213,12 +213,23 @@ async def get_purdue(
 @app.get("/hiresgrid")
 async def get_hires_grid(
     locid: str,
-    date: str,
-    time: str | None = "0000",
-    addhrs: str | None = "1",
+    startdt: str,
+    enddt: str,
+    # time: str | None = "0000",
+    # addhrs: str | None = "1",
 ) -> list[dict]:
 
-    df_hres = process_hires(locid=locid, date=date, time=time, addhrs=addhrs)
+    enddt = datetime.fromisoformat(enddt)
+    startdt = datetime.fromisoformat(startdt)
+
+    numberOfHrs = (enddt - startdt).total_seconds() // (3600)
+
+    if numberOfHrs > 24:
+        print("Too much data")
+        # TODO: return message that to much data requested
+        return pl.DataFrame().to_dicts()
+
+    df_hres = process_hires(locid=locid, sdate=startdt, edate=enddt)
     # print(df_hres.columns)
 
     return df_hres.to_dicts()
