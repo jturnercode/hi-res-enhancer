@@ -1,7 +1,8 @@
 import { API_URL } from "./env.js";
 
 const locationSel = document.getElementById("locations");
-const dtimeInput = document.getElementById("dtimeInput");
+const start_dtInput = document.getElementById("start_dt");
+const end_dtInput = document.getElementById("end_dt");
 const addhrsInput = document.getElementById("addhrs");
 const getdataBtn = document.getElementById("getdataBtn");
 const noDataNotification = document.getElementById("noDataNotification");
@@ -19,14 +20,28 @@ function addzero(int) {
   return int.toString();
 }
 
+//ADD HRS TO DATESTRING (2024-12-25T00:00)
+// RETURNS ISO STRING DATE TO MINUTE PRECISION FOR SELECT INPUT
+function addHrs(datestring, hr) {
+  const utc_date_obj = new Date(datestring);
+  const tz_offset_ms = utc_date_obj.getTimezoneOffset() * 60 * 1000;
+  const hr_ms = 1000 * 60 * 60 * hr;
+
+  const local_epoch_ms = utc_date_obj.getTime() - tz_offset_ms + hr_ms;
+  const new_date_obj = new Date(local_epoch_ms);
+  return new_date_obj.toISOString().slice(0, 16);
+}
+
 /**======================
- *    Set Datetime Input
- * default time
+ *    Set Start & End Datetime Inputs
+ * default times
  *========================**/
-let cdate = new Date();
-dtimeInput.value = `${cdate.getFullYear()}-${addzero(
-  cdate.getMonth() + 1
-)}-${addzero(cdate.getDate())}T00:00`;
+let local_date = new Date();
+start_dtInput.value = `${local_date.getFullYear()}-${addzero(
+  local_date.getMonth() + 1
+)}-${addzero(local_date.getDate())}T00:00`;
+
+end_dtInput.value = addHrs(start_dtInput.value, 1);
 
 /**============================================
  * *     Fetch location dropdown info
@@ -167,6 +182,22 @@ document.addEventListener("DOMContentLoaded", function () {
    *========================**/
   getdataBtn.addEventListener("click", async function () {
     await fetch_griddata();
+  });
+
+  /**======================
+   *    Populate end date
+   * double click, add 1 hr to start datetime
+   *========================**/
+  end_dtInput.addEventListener("dblclick", function () {
+    end_dtInput.value = addHrs(start_dtInput.value, 1);
+  });
+
+  /**======================
+   *    Populate start date
+   * double click, substract 1 hr to end datetime
+   *========================**/
+  start_dtInput.addEventListener("dblclick", function () {
+    start_dtInput.value = addHrs(end_dtInput.value, -1);
   });
 });
 

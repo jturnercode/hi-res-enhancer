@@ -42,29 +42,29 @@
           </div>
         </div>
 
-        <!-- Datetime -->
+        <!-- Start Datetime -->
         <div class="field column is-narrow">
-          <label class="label" for="EventDate">Starting Datetime</label>
+          <label class="label" for="StartDate">Starting Datetime</label>
           <div class="control">
             <input
               class="input validate"
               type="datetime-local"
-              name="EventDate"
-              id="dtimeInput"
+              name="StartDate"
+              id="start_dt"
             />
           </div>
         </div>
 
-        <!-- Additional Hours -->
+        <!-- End Datetime -->
         <div class="field column is-narrow">
-          <label class="label" for="addhrs">Additional Hours</label>
+          <label class="label" for="EndDate">End Datetime</label>
           <div class="control">
-            <input id="addhrs" class="input" type="text" value="1" />
-
-            <!-- not used maybe switch back to dropdown? vs text input -->
-            <!-- <div class="select">
-                <select id="addhrs" name="addHrs" class="validate"></select>
-              </div> -->
+            <input
+              class="input validate"
+              type="datetime-local"
+              name="EndDate"
+              id="end_dt"
+            />
           </div>
         </div>
 
