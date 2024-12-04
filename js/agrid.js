@@ -108,10 +108,8 @@ async function fetch_griddata() {
  * *              AG Grid Code
  *=============================================**/
 
-// const ragCellClassRules = {
-//   // apply green to electric cars
-//   "rag-green": (params) => params.value === true,
-// };
+// Flash codes to color text red
+let danger_arr = [173, 180];
 
 // Grid Options: Contains all of the Data Grid configurations
 const gridOptions = {
@@ -138,11 +136,14 @@ const gridOptions = {
     // defaultMinWidth: 100,
   },
 
-  // TODO: highlight mmu flash, power, etc red with rowclass rule
-  // rowClassRules: {
-  //   // apply red to Ford cars
-  //   "rag-red": (params) => params.data.make === "Ford",
-  // },
+  rowClassRules: {
+    // apply red to Ford cars
+    "rag-red": (params) => params.data.event_descriptor.includes("Red"),
+    "rag-amber": (params) => params.data.event_descriptor.includes("Yellow"),
+    // TODO: only highlight green interval vs split?
+    "rag-green": (params) => params.data.event_descriptor.includes("Green"),
+    "rag-danger": (params) => danger_arr.includes(params.data.event_code),
+  },
 
   rowSelection: {
     mode: "multiRow",

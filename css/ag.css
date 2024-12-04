@@ -1,9 +1,18 @@
 .rag-red {
-  background-color: #cc222244;
+  background-color: #ce565644;
+}
+
+.rag-amber {
+  background-color: #c9cc3344;
 }
 
 .rag-green {
-  background-color: #33cc3344;
+  background-color: #5bce5b44;
+}
+
+.rag-danger {
+  color: rgb(177, 12, 12);
+  background-color: #68686544;
 }
 
 /* color last row */
@@ -13,5 +22,5 @@
 
 .ag-theme-quartz {
   /* bright green, 10% opacity */
-  --ag-selected-row-background-color: rgb(0, 255, 0, 0.1);
+  --ag-selected-row-background-color: rgba(0, 174, 255, 0.5);
 }
