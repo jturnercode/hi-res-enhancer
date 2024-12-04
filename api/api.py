@@ -76,7 +76,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     if not dir_list:
         return pl.DataFrame()
 
-    # read files and add event descriptors
+    # Read files and add event descriptors
     df_holder: list[pl.DataFrame] = utils.add_event_descriptors(dir_list, path)
 
     # Concat list of dataframes to one dataframe for processing
@@ -106,13 +106,19 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     eventdf_holder.append(df_singles)
 
     df_fin: pl.DataFrame = (
-        pl.concat(eventdf_holder)
-        .sort(by="dt")
-        .select(pl.lit(locid).alias("loc_id"), pl.all())
-    ).with_columns(
-        pl.col("dt").dt.strftime(r"%Y-%m-%d %H:%M:%S%.3f"),
-        pl.col("dt2").dt.strftime(r"%Y-%m-%d %H:%M:%S%.3f"),
-        pl.col("duration").round(1),
+        (
+            pl.concat(eventdf_holder)
+            .sort(by="dt")
+            .select(pl.lit(locid).alias("loc_id"), pl.all())
+        )
+        # Filter out events that did not start between sdate & edate
+        .filter(pl.col("dt").is_between(sdate, edate))
+        # Format dates to string and round off duration
+        .with_columns(
+            pl.col("dt").dt.strftime(r"%Y-%m-%d %H:%M:%S%.3f"),
+            pl.col("dt2").dt.strftime(r"%Y-%m-%d %H:%M:%S%.3f"),
+            pl.col("duration").round(1),
+        )
     )
 
     # df_fin.write_csv("api/test_results.csv")

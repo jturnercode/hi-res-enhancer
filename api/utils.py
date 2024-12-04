@@ -52,6 +52,7 @@ def filter_directory(locid: str, sdt: datetime, edt: datetime):
 
         dir_list = dir_list[idx:idx_end]
 
+    # Typ error if file not found in directory, return empty list
     except Exception as err:
         print(err)
         return [], path
