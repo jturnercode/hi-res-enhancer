@@ -36,8 +36,10 @@ async def root():
 # TODO: save to db to deploy on server or package in docker
 # event codes with descriptions
 ec = pl.read_csv(source="api/event_codes.csv")
+
 # event code pairs
-ec_pairs = pl.read_csv("api/event_pairs.csv").rows()
+ec_pairs: list[tuple] = pl.read_csv("api/event_pairs.csv").rows()
+
 # single event codes
 ec_singles = pl.read_csv("api/event_singles.csv")["event_code"].to_list()
 
@@ -76,17 +78,13 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     if not dir_list:
         return pl.DataFrame()
 
-    # Read files and add event descriptors
-    df_holder: list[pl.DataFrame] = utils.add_event_descriptors(dir_list, path)
+    # Read, clean, and concat csv files
+    df_data: pl.DataFrame = utils.clean_csvs(dir_list, path)
 
-    # Concat list of dataframes to one dataframe for processing
-    df_data: pl.DataFrame = (
-        pl.concat(df_holder).sort(by="dt")
-        # Use series to map values from df to another df, great feature!!
-        .with_columns(
-            event_descriptor=pl.col("event_code").replace_strict(
-                old=ec["event_code"], new=ec["event_descriptor"], default="x"
-            )
+    # Use series to map values from df to another df, great feature!!
+    df_data = df_data.with_columns(
+        event_descriptor=pl.col("event_code").replace_strict(
+            old=ec["event_code"], new=ec["event_descriptor"], default="unknown?"
         )
     )
 
