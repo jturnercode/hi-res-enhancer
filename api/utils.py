@@ -59,13 +59,12 @@ def filter_directory(locid: str, sdt: datetime, edt: datetime):
     return dir_list, path
 
 
-def add_event_descriptors(dir_list: list, path: str):
+def clean_csvs(dir_list: list, path: str):
 
     # ===========================
     #      Read Csv Data
-    #
+    #   Clean/Format data
     #   Create one df from selected files
-    #   Add event descriptor to each event
     # ===========================
 
     df_holder = []
@@ -80,12 +79,7 @@ def add_event_descriptors(dir_list: list, path: str):
             new_columns=["dt", "event_code", "parameter"],
         )
 
-        # ===========================
-        #      Clean/Format data
-        #
-        #   add event descriptor names
-        # ===========================
-
+        # format columns
         df = df.with_columns(
             pl.col("dt").str.to_datetime(r"%-m/%d/%Y %H:%M:%S%.3f"),
             pl.col("event_code").str.replace_all(" ", ""),
@@ -98,15 +92,21 @@ def add_event_descriptors(dir_list: list, path: str):
 
         df_holder.append(df)
 
-    return df_holder
+    return pl.concat(df_holder).sort(by="dt")
 
 
-def pair_events(ec_pairs, df_data) -> list[pl.DataFrame]:
+def pair_events(ec_pairs: list[tuple], df_data: pl.DataFrame) -> list[pl.DataFrame]:
+    """ec_pairs: [(event_start_code, event_end_code, event_descriptor), ...]
+
+    Returns:
+        _type_: _description_
+    """
 
     eventdf_holder = []
 
     for ec_pair in ec_pairs:
 
+        # Return series of all unigue parameters codes for current event_start code
         ec_params = df_data.filter(pl.col("event_code") == ec_pair[0])[
             "parameter"
         ].unique()
@@ -120,6 +120,8 @@ def pair_events(ec_pairs, df_data) -> list[pl.DataFrame]:
             )
             # df_ec.write_csv("df_ec1.csv")
 
+            # Shift event codes to compare
+            # filter and keep event_codes that DO NOT MATCH (on/off pattern)
             df_ec = df_ec.filter(
                 pl.col("event_code")
                 != pl.col("event_code").shift(1, fill_value=ec_pair[1])
@@ -132,22 +134,23 @@ def pair_events(ec_pairs, df_data) -> list[pl.DataFrame]:
             if df_ec["event_code"].item(df_ec.height - 1) == ec_pair[0]:
                 df_ec = df_ec.slice(0, df_ec.height - 1)
 
+            # separate all start event codes
             df_start = df_ec.filter(
                 pl.col("event_code") == ec_pair[0], pl.col("parameter") == param
             )
 
+            # separate all end event codes
             df_end = df_ec.filter(
                 pl.col("event_code") == ec_pair[1], pl.col("parameter") == param
             ).rename(lambda cname: cname + "2")
 
             # If Event does not have pair, skip without matching
             if df_start.is_empty() or df_end.is_empty():
+                print("----- event codes with no matches -----")
                 print(f"ec1: {ec_pair[0]}, ec2: {ec_pair[1]}: param: {param} ")
                 continue
 
-            # print(df_start)
-            # print(df_end)
-
+            # stack horizontally
             df_temp = (
                 df_start.hstack(df_end)
                 .with_columns(duration=pl.col("dt2") - pl.col("dt"))
@@ -159,7 +162,7 @@ def pair_events(ec_pairs, df_data) -> list[pl.DataFrame]:
     return eventdf_holder
 
 
-def single_events(ec_singles: list, df_data) -> pl.DataFrame:
+def single_events(ec_singles: list, df_data: pl.DataFrame) -> pl.DataFrame:
 
     df_es = df_data.filter(pl.col("event_code").is_in(ec_singles))
     df_es2 = df_es.rename(lambda cname: cname + "2")
