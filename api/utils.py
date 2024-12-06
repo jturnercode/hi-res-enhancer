@@ -96,10 +96,15 @@ def clean_csvs(dir_list: list, path: str):
 
 
 def pair_events(ec_pairs: list[tuple], df_data: pl.DataFrame) -> list[pl.DataFrame]:
-    """ec_pairs: [(event_start_code, event_end_code, event_descriptor), ...]
+    """Process events that have different event codes that mark start and finish of event.
+    ex. Phase Green (ec=1, ec=7). The parameter determines phase for example case
+
+    Args:
+        ec_pairs (list[tuple]): [(event_start_code, event_end_code, event_descriptor), ...]
+        df_data (pl.DataFrame): _description_
 
     Returns:
-        _type_: _description_
+        list[pl.DataFrame]: _description_
     """
 
     eventdf_holder = []
@@ -134,12 +139,12 @@ def pair_events(ec_pairs: list[tuple], df_data: pl.DataFrame) -> list[pl.DataFra
             if df_ec["event_code"].item(df_ec.height - 1) == ec_pair[0]:
                 df_ec = df_ec.slice(0, df_ec.height - 1)
 
-            # separate all start event codes
+            # Separate all start event codes
             df_start = df_ec.filter(
                 pl.col("event_code") == ec_pair[0], pl.col("parameter") == param
             )
 
-            # separate all end event codes
+            # Separate all end event codes
             df_end = df_ec.filter(
                 pl.col("event_code") == ec_pair[1], pl.col("parameter") == param
             ).rename(lambda cname: cname + "2")
@@ -150,7 +155,7 @@ def pair_events(ec_pairs: list[tuple], df_data: pl.DataFrame) -> list[pl.DataFra
                 print(f"ec1: {ec_pair[0]}, ec2: {ec_pair[1]}: param: {param} ")
                 continue
 
-            # stack horizontally
+            # Stack horizontally
             df_temp = (
                 df_start.hstack(df_end)
                 .with_columns(duration=pl.col("dt2") - pl.col("dt"))
@@ -163,6 +168,16 @@ def pair_events(ec_pairs: list[tuple], df_data: pl.DataFrame) -> list[pl.DataFra
 
 
 def single_events(ec_singles: list, df_data: pl.DataFrame) -> pl.DataFrame:
+    """Process event codes that do not have end. These are just points in time and are notifications.
+    ex. Coord Pattern Change
+
+    Args:
+        ec_singles (list): _description_
+        df_data (pl.DataFrame): _description_
+
+    Returns:
+        pl.DataFrame: _description_
+    """
 
     df_es = df_data.filter(pl.col("event_code").is_in(ec_singles))
     df_es2 = df_es.rename(lambda cname: cname + "2")
@@ -178,3 +193,50 @@ def single_events(ec_singles: list, df_data: pl.DataFrame) -> pl.DataFrame:
     # df_temp.write_csv("temp.csv")
 
     return df_singles
+
+
+def singles_wparams(df_ecodes: pl.DataFrame, df_data: pl.DataFrame) -> pl.DataFrame:
+    """Process event codes that change depending on parameters.
+    # ex. Unit Flash - Preempt (173,8); Unit Flash - MMU (173,6)
+
+    Args:
+        df_ecodes (pl.DataFrame): event codes read from csv
+        df_data (pl.DataFrame): dataset read from purdue csv file
+
+    Returns:
+        pl.DataFrame: processed result that will be added to final df
+    """
+
+    # Temp column to match event/parameter to event/parameter in data
+    df_ecodes = df_ecodes.with_columns(
+        temp=pl.col("event_code").cast(pl.String)
+        + pl.lit("-")
+        + pl.col("event_param").cast(pl.String)
+    )
+
+    df_es = (
+        df_data.filter(pl.col("event_code").is_in(df_ecodes["event_code"].unique()))
+        .with_columns(
+            temp=pl.col("event_code").cast(pl.String)
+            + pl.lit("-")
+            + pl.col("parameter").cast(pl.String)
+        )
+        .with_columns(
+            event_descriptor=pl.col("temp").replace_strict(
+                old=df_ecodes["temp"],
+                new=df_ecodes["event_description"],
+                default="unknown?",
+            )
+        )
+        .drop("temp")
+    )
+
+    df_es2 = df_es.rename(lambda cname: cname + "2")
+
+    df_singles_wparams = (
+        df_es.hstack(df_es2)
+        .with_columns(duration=pl.col("dt2") - pl.col("dt"))
+        .with_columns(pl.col("duration").dt.total_milliseconds() / 1000)
+    )
+
+    return df_singles_wparams

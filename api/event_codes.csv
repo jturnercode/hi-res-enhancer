@@ -12,6 +12,13 @@ event_code,event_descriptor
 10,Phase Begin RedClearance
 11,Phase End RedClearance
 12,Phase Inactive
+13,Extension Timer Gap Out
+14,Phase Skipped
+15,Extension Timer Reduction Start
+16,Extension Timer Min Achieved
+17,Add Initial Complete
+18,Next Phase Decision
+20,Preemption Force Off
 21,Pedestrian Begin Walk
 22,Pedestrian Begin Clearance
 23,Pedestrian Begin Solid Don't Walk
@@ -28,6 +35,8 @@ event_code,event_descriptor
 47,Phase Omit Off
 48,Pedestrian Omit On
 49,Pedestrian Omit Off
+50,Max I In-Effect
+51,Max 2 In-Effect
 61,Overlap Begin Green
 62,Overlap Begin TrailingGreen (Extension)
 63,Overlap Begin Yellow
@@ -65,36 +74,9 @@ event_code,event_descriptor
 113,TSP Adjustment to EarlyGreen
 114,TSP Adjustment toExtend Green
 115,TSP Check Out
-171,Test Input on
-172,Test Input off
-173,Unit Flash Status change
-174,Unit Alarm Status 1 Change
-175,Alarm Group State Change
-176,Special Function Output On
-177,Special Function Output Off
-178,Manual control enable off/on
-179,Interval Advance off/on
-180,Stop Time Input off/on
-181,Controller Clock Updated
-182,Power Failure Detected
-184,Power Restored
-185,Vendor Specific Alarm
 131,Coord Pattern Change
 132,Cycle Length Change
 133,Offset Length Change
-150,Coord Cycle State Change
-151,Coordinated phase yield point
-200,Alarm On #
-201,Alarm Off #
-18,Next Phase Decision
-16,Extension Timer Min Achieved
-17,Add Initial Complete
-20,Preemption Force Off
-13,Extension Timer Gap Out
-14,Phase Skipped
-15,Extension Timer Reduction Start
-50,Max I In-Effect
-51,Max 2 In-Effect
 134,Split 1 Change
 135,Split 2 Change
 136,Split 3 Change
@@ -111,6 +93,25 @@ event_code,event_descriptor
 147,Split 14 Change
 148,Split 15 Change
 149,Split 16 Change
+150,Coord Cycle State Change
+151,Coordinated phase yield point
+155,Unit Control Status Change
+171,Test Input on
+172,Test Input off
+173,Unit Flash Status change
+174,Unit Alarm Status 1 Change
+175,Alarm Group State Change
+176,Special Function Output On
+177,Special Function Output Off
+178,Manual control enable off/on
+179,Interval Advance off/on
+180,Stop Time Input off/on
+181,Controller Clock Updated
+182,Power Failure Detected
+184,Power Restored
+185,Vendor Specific Alarm
+200,Alarm On #
+201,Alarm Off #
 203,Split 17 Change
 204,Split 18 Change
 205,Split 19 Change
@@ -120,4 +121,3 @@ event_code,event_descriptor
 209,Split 23 Change
 210,Split 24 Change
 211,Split 25 Change
-155,Unit Control Status Change

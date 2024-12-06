@@ -43,6 +43,10 @@ ec_pairs: list[tuple] = pl.read_csv("api/event_pairs.csv").rows()
 # single event codes
 ec_singles = pl.read_csv("api/event_singles.csv")["event_code"].to_list()
 
+# single event codes with parameters
+# ex. Unit Flash - Preempt (173,8); Unit Flash - MMU (173,6)
+ec_single_wparams: pl.DataFrame = pl.read_csv("api/ec_singles_wParams.csv")
+
 # ================================================
 # *             Locations
 # Used to populate locations dropdown
@@ -96,12 +100,19 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
 
     # ================================================
     #  *             Single Event Code
-    #   Events that only have singel event code
+    #   Events that only have single event code
     # ================================================
 
     df_singles = utils.single_events(ec_singles, df_data)
-
     eventdf_holder.append(df_singles)
+
+    # ================================================
+    #  *        Single Event Codes w/Parmameters
+    #   Events codes that change with pass parameter
+    # ================================================
+
+    df_singles_wparms = utils.singles_wparams(ec_single_wparams, df_data)
+    eventdf_holder.append(df_singles_wparms)
 
     df_fin: pl.DataFrame = (
         (

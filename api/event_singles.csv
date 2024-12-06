@@ -3,10 +3,8 @@ event_code,event_description
 45,Ped Call Registered
 4,Phase Gap Out
 181,Controller Clock Updated
-180,Stop Time Input
 179,Interval Advance
 178,Manual Control
-173,Unit Flash Status Change
 150,Coord Cycle State Change
 133,Offset Length Change
 132,Cycle Length Change
