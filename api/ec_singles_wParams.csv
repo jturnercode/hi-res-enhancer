@@ -1,0 +1,11 @@
+event_code,event_param,event_description
+173,1,Unit Flash - other
+173,2,Unit Flash - notFlash
+173,3,Unit Flash - Automatic
+173,4,Unit Flash - Local Manual
+173,5,Unit Flash - Fault Monitor
+173,6,Unit Flash - MMU
+173,7,Unit Flash - Startup
+173,8,Unit Flash - Preempt
+180,0,Stop Time Input Off
+180,1,Stop Time Input On

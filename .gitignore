@@ -5,12 +5,12 @@
 *.columns
 *.xlsx
 _*
-gaps
-controller_old
+
 
 # project files
 !requirements.txt
 !event*.csv
+!ec*.csv
 
 
 # env & config files
