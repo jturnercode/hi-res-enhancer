@@ -21,7 +21,7 @@ event_code,event_descriptor
 20,Preemption Force Off
 21,Pedestrian Begin Walk
 22,Pedestrian Begin Clearance
-23,Pedestrian Begin Solid Don't Walk
+23,Pedestrian End Clearance
 24,Pedestrian Dark
 31,Barrier Termination
 32,FYA Begin Permissive
@@ -74,6 +74,7 @@ event_code,event_descriptor
 113,TSP Adjustment to EarlyGreen
 114,TSP Adjustment toExtend Green
 115,TSP Check Out
+116,Preemption Force Off
 131,Coord Pattern Change
 132,Cycle Length Change
 133,Offset Length Change
@@ -95,6 +96,7 @@ event_code,event_descriptor
 149,Split 16 Change
 150,Coord Cycle State Change
 151,Coordinated phase yield point
+152,Coordinated Phase Begin
 155,Unit Control Status Change
 171,Test Input on
 172,Test Input off
@@ -121,3 +123,10 @@ event_code,event_descriptor
 209,Split 23 Change
 210,Split 24 Change
 211,Split 25 Change
+212,Split 26 Change
+213,Split 27 Change
+214,Split 28 Change
+215,Split 29 Change
+216,Split 30 Change
+217,Split 31 Change
+218,Split 32 Change

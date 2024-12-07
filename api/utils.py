@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import polars as pl
 
 
@@ -240,3 +240,143 @@ def singles_wparams(df_ecodes: pl.DataFrame, df_data: pl.DataFrame) -> pl.DataFr
     )
 
     return df_singles_wparams
+
+
+# TODO: handle mmu events; they cut off current phases. Pass sets of start/end, divide get intervals
+def event_intervals(
+    ec_pairs: pl.DataFrame, df_data: pl.DataFrame, sdt: datetime, edt: datetime
+) -> list[pl.DataFrame]:
+    """Return start and end intervals for event codes specified in ec_pairs.
+    These events with give phase, overlap, and operational status in final grid viz.
+    ex. Phase Green (ec=1, ec=7). The parameter not shown determines the phase for example case
+
+    Args:
+        ec_pairs (list[tuple]): [(event_start_code, event_end_code, event_descriptor), ...]
+        df_data (pl.DataFrame): _description_
+
+    Returns:
+        list[pl.DataFrame]: _description_
+    """
+
+    interval_holder = []
+
+    for ec_pair in ec_pairs.rows():
+
+        # Return series of all unigue parameters codes for current event_start code
+        eventcode_params = df_data.filter(pl.col("event_code") == ec_pair[0])[
+            "parameter"
+        ].unique()
+
+        for param in eventcode_params:
+            # print(f"ec1: {ec_pair[0]}, ec2: {ec_pair[1]}: param: {param} ")
+
+            df_ec = df_data.filter(
+                pl.col("event_code").is_in([ec_pair[0], ec_pair[1]]),
+                pl.col("parameter") == param,
+            )
+
+            # ================================================
+            #      Orphan Event From Previous Period
+            #
+            # Add row for orphan event_end codes (ec_pair[1])
+            # with start time per user requested start_dt
+            # (ie. No matching event_start codes)
+            # Previous Code discarded orphan events
+            # ie: orphaned events that started prior to requested time
+            # *The added assumed event start times are marked
+            # *with '**' in the Event descriptor
+            # ================================================
+            if df_ec["event_code"].item(0) == ec_pair[1]:
+
+                new_row = [sdt, *ec_pair][:-1]
+                # Change Third item to correct param
+                new_row[2] = param
+                new_row[3] += "**"
+
+                # print("-----> Add Begin:", new_row)
+                new = pl.DataFrame(
+                    data=[new_row],
+                    schema=["dt", "event_code", "parameter", "event_descriptor"],
+                    orient="row",
+                    # Have to cast sdt to milliseconds
+                ).with_columns(pl.col("dt").dt.cast_time_unit("ms"))
+
+                # Concat old to new df
+                df_ec = pl.concat(items=[new, df_ec], how="vertical")
+                # print("Mod begin", df_ec)
+
+            # ================================================
+            #      Orphan Events at End of Period
+            #
+            # Add row for orphan event_start codes (ec_pair[0])
+            # with start time per user requested start_dt
+            # (ie No Matching event_end code)
+            # ie: orphaned events that did not end before
+            # requested end_dt
+            # *The added assumed event end times are marked
+            # *with '**' in the Event descriptor
+            # ================================================
+            if df_ec["event_code"].item(df_ec.height - 1) == ec_pair[0]:
+
+                new_row = [edt, *ec_pair][:-1]
+                # Change Third item to correct param
+                new_row[1] = ec_pair[1]
+                new_row[2] = param
+                new_row[3] += "**"
+
+                # print("-----> Add End:", new_row)
+                new = pl.DataFrame(
+                    data=[new_row],
+                    schema=["dt", "event_code", "parameter", "event_descriptor"],
+                    orient="row",
+                    # Have to cast sdt to milliseconds
+                ).with_columns(pl.col("dt").dt.cast_time_unit("ms"))
+
+                # Concat old to new df
+                df_ec = pl.concat(items=[df_ec, new], how="vertical")
+                # print("Mod end", df_ec)
+
+            # ================================================
+            #          Shift to Check On/off pattern
+            #
+            # Shift event codes to compare
+            # filter and keeps event_codes that DO NOT MATCH (ie on/off pattern)
+            # Removes events that do not follow on/off pattern
+            # ie [1,2,1,2,2,1] removes on of the 2,2
+            # Note: Used to remove orphan end events from previous
+            # period but now handle these events w/added logic
+            # ================================================
+            df_ec = df_ec.filter(
+                pl.col("event_code")
+                != pl.col("event_code").shift(n=1, fill_value=ec_pair[1])
+            )
+
+            # ================================================
+            #                Concat Logic
+            # ================================================
+            # Separate all start event codes
+            df_start = df_ec.filter(
+                pl.col("event_code") == ec_pair[0], pl.col("parameter") == param
+            )
+
+            # Separate all end event codes
+            df_end = df_ec.filter(
+                pl.col("event_code") == ec_pair[1], pl.col("parameter") == param
+            ).rename(lambda cname: cname + "2")
+
+            # # If Event does not have pair, skip without matching
+            # if df_start.is_empty() or df_end.is_empty():
+            #     print("----- event codes with no matches -----")
+            #     print(f"ec1: {ec_pair[0]}, ec2: {ec_pair[1]}: param: {param} ")
+            #     continue
+
+            # Stack horizontally
+            df_temp = (
+                df_start.hstack(df_end)
+                # .with_columns(duration=pl.col("dt2") - pl.col("dt"))
+                # .with_columns(pl.col("duration").dt.total_milliseconds() / 1000)
+            )
+
+            interval_holder.append(df_temp)
+
+    return pl.concat(items=interval_holder, how="vertical")

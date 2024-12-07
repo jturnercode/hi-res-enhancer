@@ -119,15 +119,15 @@ const gridOptions = {
   // Column Definitions: Defines the columns to be displayed.
   columnDefs: [
     { field: "loc_id", headerName: "LocID" },
-    { field: "dt", headerName: "Datetime 1" },
-    { field: "event_code", headerName: "Event Code 1" },
-    { field: "parameter", headerName: "Parameter 1" },
-    { field: "event_descriptor", headerName: "Event Descriptor 1" },
-    { field: "dt2", headerName: "Datetime 2" },
-    { field: "event_code2", headerName: "Event Code 2" },
-    { field: "parameter2", headerName: "Parameter 2" },
-    { field: "event_descriptor2", headerName: "Event Descriptor 2" },
-    { field: "duration" },
+    { field: "dt", headerName: "Datetime" },
+    { field: "event_code", headerName: "Event Code" },
+    { field: "parameter", headerName: "Parameter" },
+    { field: "event_descriptor", headerName: "Event Descriptor" },
+    { field: "phase_status", headerName: "Phase Status" },
+    { field: "ovl_status", headerName: "Overlap Status" },
+    { field: "ops_status", headerName: "Operational Status" },
+    // { field: "parameter2", headerName: "Parameter 2" },
+    // { field: "duration" },
   ],
 
   autoSizeStrategy: {
