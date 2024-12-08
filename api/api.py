@@ -160,7 +160,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
             .otherwise(pl.col("ovl_status"))
         )
 
-        # ================================================
+    # ================================================
     # *             Add Overlap Status Info
     #  ???
     # ================================================
@@ -182,43 +182,16 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
         )
 
     # ================================================
-    # *             Pair Event Code
-    #  alarms that have paired event codes for on/off
-    # ================================================
-    # eventdf_holder = utils.pair_events(ec_pairs, df_data)
-
-    # ================================================
-    #  *             Single Event Code
-    #   Events that only have single event code
-    # ================================================
-    # eventdf_holder = []
-
-    # df_singles = utils.single_events(ec_singles, df_data)
-    # eventdf_holder.append(df_singles)
-
-    # ================================================
     #  *        Single Event Codes w/Parmameters
     #   Events codes that change with pass parameter
     # ================================================
 
-    # df_singles_wparms = utils.singles_wparams(ec_single_wparams, df_data)
-    # eventdf_holder.append(df_singles_wparms)
+    df_data = utils.singles_wparams(ec_single_wparams, df_data)
 
-    # df_fin: pl.DataFrame = (
-    #     (
-    #         pl.concat(eventdf_holder)
-    #         .sort(by="dt")
-    #         .select(pl.lit(locid).alias("loc_id"), pl.all())
-    #     )
-    #     # Format dates to string and round off duration
-    #     .with_columns(
-    #         pl.col("dt").dt.strftime(r"%Y-%m-%d %H:%M:%S%.3f"),
-    #         pl.col("dt2").dt.strftime(r"%Y-%m-%d %H:%M:%S%.3f"),
-    #         pl.col("duration").round(1),
-    #     )
-    # )
-
-    df_fin: pl.DataFrame = (
+    # ================================================
+    #     Add locid column and sort/formatting
+    # ================================================
+    df_data = (
         df_data.sort(by=["dt", "event_code"]).select(
             pl.lit(locid).alias("loc_id"),
             pl.all(),
@@ -229,7 +202,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
         )
     )
 
-    return df_fin
+    return df_data
 
 
 # ================================================

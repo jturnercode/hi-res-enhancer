@@ -1,6 +1,6 @@
 event_code,event_param,event_description
 173,1,Unit Flash - other
-173,2,Unit Flash - notFlash
+173,2,Unit Flash - Exit Flash
 173,3,Unit Flash - Automatic
 173,4,Unit Flash - Local Manual
 173,5,Unit Flash - Fault Monitor
