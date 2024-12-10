@@ -86,12 +86,16 @@ async function fetch_griddata() {
   let sdt = start_dtInput.value.replace("T", " ");
   let edt = end_dtInput.value.replace("T", " ");
 
+  getdataBtn.classList.add("is-loading");
+
   let response = await fetch(
     `${API_URL}/hiresgrid?locid=${locationSel.value}&startdt=${sdt}&enddt=${edt}`
   );
 
   // list of dictionaries
   let gridDataObj = await response.json();
+
+  getdataBtn.classList.remove("is-loading");
 
   // CHECK IF DATA WAS RETURNED; IF NOT SHOW NOTIFICATION BANNER
   if (Object.keys(gridDataObj).length === 0) {
@@ -143,6 +147,7 @@ const gridOptions = {
     // TODO: only highlight green interval vs split?
     "rag-green": (params) => params.data.event_descriptor.includes("Green"),
     "rag-danger": (params) => danger_arr.includes(params.data.event_code),
+    "rag-danger": (params) => params.data.event_descriptor.includes("MMU"),
   },
 
   rowSelection: {
