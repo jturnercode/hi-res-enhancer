@@ -11,8 +11,13 @@
 }
 
 .rag-danger {
-  color: rgb(177, 12, 12);
-  background-color: #68686544;
+  color: rgb(158, 9, 9);
+  background-color: #68686517;
+}
+
+.rag-ops {
+  color: rgb(12, 116, 177);
+  /* background-color: #68686544; */
 }
 
 /* color last row */

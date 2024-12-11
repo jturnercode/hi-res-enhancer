@@ -113,7 +113,22 @@ async function fetch_griddata() {
  *=============================================**/
 
 // Flash codes to color text red
-let danger_arr = [173, 180];
+let danger_arr = [
+  "173-6",
+  "173-2",
+  "173-5",
+  "173-1",
+  "173-3",
+  "173-4",
+  "173-7",
+  "173-8",
+  "200-15",
+  "201-15",
+  "200-2",
+  "201-2",
+];
+
+let ops_arr = ["200-5", "201-5"];
 
 // Grid Options: Contains all of the Data Grid configurations
 const gridOptions = {
@@ -146,8 +161,19 @@ const gridOptions = {
     "rag-amber": (params) => params.data.event_descriptor.includes("Yellow"),
     // TODO: only highlight green interval vs split?
     "rag-green": (params) => params.data.event_descriptor.includes("Green"),
-    "rag-danger": (params) => danger_arr.includes(params.data.event_code),
-    "rag-danger": (params) => params.data.event_descriptor.includes("MMU"),
+
+    "rag-danger": (params) =>
+      danger_arr.includes(
+        params.data.event_code.toString() +
+          "-" +
+          params.data.parameter.toString()
+      ),
+    "rag-ops": (params) =>
+      ops_arr.includes(
+        params.data.event_code.toString() +
+          "-" +
+          params.data.parameter.toString()
+      ),
   },
 
   rowSelection: {
