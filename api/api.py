@@ -94,9 +94,20 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
             old=ec["event_code"], new=ec["event_descriptor"], default="unknown?"
         )
         # Filter out events that did not start between sdate & edate
-    ).filter(pl.col("dt").is_between(sdate, edate))
+    ).filter(
+        pl.col("dt").is_between(sdate, edate),
+        # REMOVE DETECTOR EVENTS
+        ~pl.col("event_code").is_in([81, 82]),
+    )
 
     print("----** Start data size: ", df_data.shape)
+
+    # ================================================
+    #  *        Single Event Codes w/Parmameters
+    #   Modify Events code descriptors that change with parameter#
+    # ================================================
+
+    df_data = utils.singles_wparams(ec_single_wparams, df_data)
 
     # ================================================
     # *             Event Code Intervals
@@ -144,7 +155,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     #  ???
     # ================================================
 
-    phase_int = intervals.filter(pl.col("event_code").is_in([63, 64, 65]))
+    phase_int = intervals.filter(pl.col("event_code").is_in([61, 63, 64, 62, 67, 68]))
 
     for int in phase_int.to_dicts():
 
@@ -161,11 +172,13 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
         )
 
     # ================================================
-    # *             Add Overlap Status Info
+    # *             Add Operational Status Info
     #  ???
     # ================================================
 
-    phase_int = intervals.filter(pl.col("event_code").is_in([106, 107, 111, 182]))
+    phase_int = intervals.filter(
+        pl.col("event_code").is_in([102, 105, 106, 107, 111, 182])
+    )
 
     for int in phase_int.to_dicts():
 
@@ -182,13 +195,6 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
         )
 
     # ================================================
-    #  *        Single Event Codes w/Parmameters
-    #   Events codes that change with pass parameter
-    # ================================================
-
-    df_data = utils.singles_wparams(ec_single_wparams, df_data)
-
-    # ================================================
     #     Add locid column and sort/formatting
     # ================================================
     df_data = (
@@ -202,6 +208,14 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
         )
     )
 
+    # ? Test code
+    # df_data = df_data.filter(
+    #     pl.col("event_code").is_in([200, 201, 173]),
+    #     pl.col("parameter").is_in([15, 5, 6, 7, 2, 3, 8, 1]),
+    # )
+
+    # TODO: calculate time between previous event shown in grid; helps review of events
+    # TODO: OR how do i show events happening at same time? check box group event by time?
     return df_data
 
 

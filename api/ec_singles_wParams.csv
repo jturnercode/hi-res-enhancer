@@ -1,11 +1,44 @@
 event_code,event_param,event_description
 173,1,Unit Flash - other
-173,2,Unit Flash - Exit Flash
+173,2,Unit Flash - Exit
 173,3,Unit Flash - Automatic
 173,4,Unit Flash - Local Manual
-173,5,Unit Flash - Fault Monitor
+173,5,Unit Flash - CU Fault Monitor
 173,6,Unit Flash - MMU
 173,7,Unit Flash - Startup
 173,8,Unit Flash - Preempt
 180,0,Stop Time Input Off
 180,1,Stop Time Input On
+200,1,Alarm On - Power Up
+200,2,Alarm On - Stop Timing 
+200,5,Alarm On - Cabinet Door TS2
+200,7,Alarm On - Phase 2 Ped Walk
+200,8,Alarm On - Phase 4 Ped Walk
+200,10,Alarm On - Phase 6 Ped Walk
+200,11,Alarm On - Phase 8 Ped Walk
+200,15,Alarm On-MMU Flash Input
+200,30,Alarm On-Pattern Err
+200,31,Alarm On - Cabinet Flash
+200,38,Alarm On - Pattern Change
+200,47,Alarm On - Coord Active
+200,61,Alarm On - Coord Transition
+200,64,Alarm On - SynchroGreen Active
+200,70,Alarm On - Internal Clock Jump
+200,73,Alarm On - Controller Access
+201,2,Alarm Off-Stop Timing 
+201,5,Alarm Off - Cabinet Door TS2
+201,7,Alarm Off - Phase 2 Ped Walk
+201,8,Alarm Off - Phase 4 Ped Walk
+201,10,Alarm Off - Phase 6 Ped Walk
+201,11,Alarm Off - Phase 8 Ped Walk
+201,15,Alarm Off - MMU Flash Input
+201,30,Alarm Off - Pattern Err
+201,31,Alarm Off - Cabinet Flash
+201,47,Alarm Off - Coord Active
+201,61,Alarm Off - Coord Transition
+201,73,Alarm Off - Controller Access
+201,1,Alarm Off - Power Up
+200,48,Alarm On - Preempt Active
+201,48,Alarm Off - Preempt Active
+200,49,Alarm On - Preempt 1
+201,49,Alarm Off - Preempt 1
