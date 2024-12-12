@@ -3,7 +3,6 @@ import { API_URL } from "./env.js";
 const locationSel = document.getElementById("locations");
 const start_dtInput = document.getElementById("start_dt");
 const end_dtInput = document.getElementById("end_dt");
-const addhrsInput = document.getElementById("addhrs");
 const getdataBtn = document.getElementById("getdataBtn");
 const noDataNotification = document.getElementById("noDataNotification");
 
@@ -126,9 +125,13 @@ let danger_arr = [
   "201-15",
   "200-2",
   "201-2",
+  "200-1",
+  "201-1",
+  "180-1",
+  "180-0",
 ];
 
-let ops_arr = ["200-5", "201-5"];
+let ops_arr = ["200-5", "201-5", "200-48", "201-48"];
 
 // Grid Options: Contains all of the Data Grid configurations
 const gridOptions = {
@@ -218,6 +221,12 @@ document.addEventListener("DOMContentLoaded", function () {
    *    Get Data Button
    *========================**/
   getdataBtn.addEventListener("click", async function () {
+    if (start_dtInput.value > end_dtInput.value) {
+      end_dtInput.classList.add("is-danger");
+      return 0;
+    }
+    end_dtInput.classList.remove("is-danger");
+
     await fetch_griddata();
   });
 
