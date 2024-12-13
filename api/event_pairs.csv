@@ -18,6 +18,5 @@ event_start,event_end,event_description,abbr
 105,106,Preempt Entry Started,PreEntry
 106,107,Preempt Track Clear,preTrk
 107,111,Preempt Dwell,preDwl
-111,104,Preempt Exit,preExit
 182,184,Power Failure,pwrFail
 200,201,Alarm On/Off,alrm

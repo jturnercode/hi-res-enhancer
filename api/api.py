@@ -201,6 +201,18 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
             .otherwise(pl.col("ops_status"))
         )
 
+    # =================== Single Event Ops Code ================
+    # Events that only have a start but no end codes
+    se = [(111, "PreExit")]
+
+    # TODO: set all events at detected event time vs just one event
+    for e in se:
+        df_data = df_data.with_columns(
+            ops_status=pl.when(pl.col("event_code") == e[0])
+            .then(pl.col("ops_status").list.concat(pl.lit(e[1])))
+            .otherwise(pl.col("ops_status"))
+        )
+
     # ============= Add Flash events to ops status ==============
     for int in fPeriods:
 

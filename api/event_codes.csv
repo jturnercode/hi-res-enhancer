@@ -69,7 +69,7 @@ event_code,event_descriptor
 108,Preemption Link ActiveOn
 109,Preemption Link ActiveOff
 110,Preemption MaxPresence Exceeded
-111,Preemption Begin ExitInterval
+111,Preemption Begin Exit Interval
 112,TSP Check In
 113,TSP Adjustment to EarlyGreen
 114,TSP Adjustment toExtend Green
