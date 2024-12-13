@@ -116,15 +116,18 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     # Need intervals to show different status in ag-grid
     # (phase, overlap, & other operation status)
     # ================================================
-    intervals: pl.DataFrame = utils.event_intervals(ec_pairs, df_data, sdate, edate)
+    nfPeriods, fPeriods = utils.flash_periods(df_data, sdate, edate)
+    nonFlashEventInts: pl.DataFrame = utils.event_intervals(
+        ec_pairs, df_data, nfPeriods
+    )
 
-    # Add abbr column to interval results
-    intervals = intervals.with_columns(
+    # Add abbr column to non Flash interval results
+    nonFlashEventInts = nonFlashEventInts.with_columns(
         abbr=pl.col("event_code").replace_strict(
             old=ec_pairs["event_start"], new=ec_pairs["abbr"]
         )
     )
-    # print(intervals)
+    # print(nonFlashEventInts)
 
     # Add status columns as list tyoe to df_data
     df_data = df_data.with_columns(phase_status=[], ovl_status=[], ops_status=[])
@@ -134,7 +137,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     #  ???
     # ================================================
 
-    phase_int = intervals.filter(pl.col("event_code").is_in([1, 8, 10, 21, 22]))
+    phase_int = nonFlashEventInts.filter(pl.col("event_code").is_in([1, 8, 10, 21, 22]))
 
     for int in phase_int.to_dicts():
 
@@ -155,7 +158,9 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     #  ???
     # ================================================
 
-    phase_int = intervals.filter(pl.col("event_code").is_in([61, 63, 64, 62, 67, 68]))
+    phase_int = nonFlashEventInts.filter(
+        pl.col("event_code").is_in([61, 63, 64, 62, 67, 68])
+    )
 
     for int in phase_int.to_dicts():
 
@@ -176,7 +181,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     #  ???
     # ================================================
 
-    phase_int = intervals.filter(
+    phase_int = nonFlashEventInts.filter(
         pl.col("event_code").is_in([102, 105, 106, 107, 111, 182])
     )
 
@@ -191,6 +196,15 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
                     [str(int["parameter"]) + pl.lit(int["abbr"])]
                 )
             )
+            .otherwise(pl.col("ops_status"))
+        )
+
+    # ============= Add Flash events to ops status ==============
+    for int in fPeriods:
+
+        df_data = df_data.with_columns(
+            ops_status=pl.when(pl.col("dt").is_between(int[0], int[1], closed="left"))
+            .then(pl.col("ops_status").list.concat(pl.lit("Flash")))
             .otherwise(pl.col("ops_status"))
         )
 

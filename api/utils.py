@@ -232,20 +232,7 @@ def singles_wparams(df_ecodes: pl.DataFrame, df_data: pl.DataFrame) -> pl.DataFr
     return df_data
 
 
-def event_intervals(
-    ec_pairs: pl.DataFrame, df_data: pl.DataFrame, sdt: datetime, edt: datetime
-) -> list[pl.DataFrame]:
-    """Return start and end intervals for event codes specified in ec_pairs.
-    These events with give phase, overlap, and operational status in final grid viz.
-    ex. Phase Green (ec=1, ec=7). The parameter not shown determines the phase for example case
-
-    Args:
-        ec_pairs (list[tuple]): [(event_start_code, event_end_code, event_descriptor), ...]
-        df_data (pl.DataFrame): _description_
-
-    Returns:
-        list[pl.DataFrame]: _description_
-    """
+def flash_periods(df_data: pl.DataFrame, sdt: datetime, edt: datetime):
 
     # ================================================
     #          DETERMINE MMU FLASH PERIODS
@@ -265,7 +252,7 @@ def event_intervals(
     )
 
     nonFlashPeriod = []
-    FlashPeriod = []
+    flashPeriod = []
 
     # If flash events detected
     if flash_events.height > 0:
@@ -313,22 +300,43 @@ def event_intervals(
                 )
                 i += 1
             else:
-                FlashPeriod.append((flash_events[i]["dt"], flash_events[i + 1]["dt"]))
+                flashPeriod.append((flash_events[i]["dt"], flash_events[i + 1]["dt"]))
                 i += 1
 
         # print("nonFlashPeriods: ", nonFlashPeriod)
-        # print("FlashPeriods: ", FlashPeriod)
+        # print("FlashPeriods: ", flashPeriod)
 
     # If no mmu flash events detected
     else:
         nonFlashPeriod = [(sdt, edt)]
 
+    return nonFlashPeriod, flashPeriod
+
+
+def event_intervals(
+    ec_pairs: pl.DataFrame,
+    df_data: pl.DataFrame,
+    nonFlashPeriod: list[tuple[datetime, datetime]],
+) -> list[pl.DataFrame]:
+    """Return start and end intervals for event codes specified in ec_pairs.
+    These events with give phase, overlap, and operational status in final grid viz.
+    ex. Phase Green (ec=1, ec=7). The parameter not shown determines the phase for example case
+
+    Args:
+        ec_pairs (list[tuple]): [(event_start_code, event_end_code, event_descriptor), ...]
+        df_data (pl.DataFrame): _description_
+
+    Returns:
+        list[pl.DataFrame]: _description_
+    """
+
     # ================================================
     #       Determine Intervals for all events
     # like phases, overlaps, etc during nonFlashPeriods
+    # ? these events have "different start/event ecodes and same parameters"
     # ================================================
 
-    interval_holder = []
+    nonFlash_holder = []
 
     for period in nonFlashPeriod:
 
@@ -336,6 +344,7 @@ def event_intervals(
             pl.col("dt").is_between(period[0], period[1]),
         )
 
+        # TODO: make ec_pairs.rows() to ec_pairs.dicts() to make code more readable
         for ec_pair in ec_pairs.rows():
 
             # Return series of all unigue parameters codes for current event_start codes
@@ -452,6 +461,6 @@ def event_intervals(
                     # .with_columns(duration=pl.col("dt2") - pl.col("dt"))
                     # .with_columns(pl.col("duration").dt.total_milliseconds() / 1000)
                 )
-                interval_holder.append(df_temp)
+                nonFlash_holder.append(df_temp)
 
-    return pl.concat(items=interval_holder, how="vertical")
+    return pl.concat(items=nonFlash_holder, how="vertical")
