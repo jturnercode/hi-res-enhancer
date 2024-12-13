@@ -129,8 +129,10 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     )
     # print(nonFlashEventInts)
 
-    # Add status columns as list tyoe to df_data
-    df_data = df_data.with_columns(phase_status=[], ovl_status=[], ops_status=[])
+    # Add status columns as list type to df_data
+    df_data = df_data.with_columns(
+        phase_status=[], ovl_status=[], ops_status=[], time_grp=[]
+    )
 
     # ================================================
     # *             Add Phase Status Info
@@ -209,6 +211,27 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
         )
 
     # ================================================
+    #                Group Events by DT
+    # Ag grid will highlight to be able to quickly distinguish
+    # time change
+    # ================================================
+
+    time_grp = df_data.select(pl.col("dt").unique().sort()).to_series().to_list()
+
+    ints = []
+    i = 0
+    while i < len(time_grp) - 1:
+        ints.append((time_grp[i], time_grp[i + 1]))
+        i += 2
+
+    for i in ints:
+        df_data = df_data.with_columns(
+            time_grp=pl.when(pl.col("dt").is_between(i[0], i[1], closed="left"))
+            .then(pl.col("time_grp").list.concat(pl.lit("x")))
+            .otherwise(pl.col("time_grp"))
+        )
+
+    # ================================================
     #     Add locid column and sort/formatting
     # ================================================
     df_data = (
@@ -229,7 +252,6 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     # )
 
     # TODO: calculate time between previous event shown in grid; helps review of events
-    # TODO: OR how do i show events happening at same time? check box group event by time?
     return df_data
 
 
