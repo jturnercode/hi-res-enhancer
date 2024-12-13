@@ -72,7 +72,6 @@ def clean_csvs(dir_list: list, path: str):
     for file in dir_list:
         print(file)
         df = pl.read_csv(
-            # source=path + "\\" + file,
             source=path + "/" + file,
             has_header=False,
             skip_rows=6,
@@ -233,7 +232,6 @@ def singles_wparams(df_ecodes: pl.DataFrame, df_data: pl.DataFrame) -> pl.DataFr
     return df_data
 
 
-# TODO: handle mmu events; they cut off current phases. Pass sets of start/end, divide get intervals
 def event_intervals(
     ec_pairs: pl.DataFrame, df_data: pl.DataFrame, sdt: datetime, edt: datetime
 ) -> list[pl.DataFrame]:
@@ -269,89 +267,65 @@ def event_intervals(
     nonFlashPeriod = []
     FlashPeriod = []
 
-    #  and create periods
+    # If flash events detected
     if flash_events.height > 0:
 
-        # Remove duplicates (keep first occurence)
-        fill_val = "201-15"
-        if flash_events.item(0, "ecp_code") == "201-15":
-            fill_val = "200-15"
-
-        # ?======== Test Code =========
-        # Show all values + shifted column for troubleshooting
-        shift_log = flash_events.with_columns(
-            b=pl.col("ecp_code").shift(n=1, fill_value=fill_val)
-        )
-        # shift_log.write_csv("./_logs/flash_events.csv")
-        print(shift_log)
-        # ? ===================
-
-        # flash_events = flash_events.filter(pl.col("ecp_code") != pl.col("b"))
-        # NOTE: Shift 1 keep first instance, shift -1 keeps last for code below
-        flash_events = flash_events.filter(
-            pl.col("ecp_code") != pl.col("ecp_code").shift(n=1, fill_value=fill_val)
-        )
-        # flash_events.write_csv("./_logs/flash_events_filtered.csv")
-        data = []
-        if flash_events.item(0, "ecp_code") == "200-15":
-            data.append(
-                {
-                    "dt": sdt,
-                    "event_code": 0,
-                    "parameter": None,
-                    "event_descriptor": None,
-                    "ecp_code": None,
-                }
-            )
-
-        if flash_events.item(flash_events.height - 1, "ecp_code") == "201-15":
-            data.append(
-                {
-                    "dt": edt,
-                    "event_code": 0,
-                    "parameter": None,
-                    "event_descriptor": None,
-                    "ecp_code": None,
-                }
-            )
-
         # ============================================
-        #     Create list Non-flash Intervals/ periods
+        #   Add sdt & edt to detected flash intervals
         # ============================================
 
-        se = pl.DataFrame(data=data).with_columns(pl.col("dt").dt.cast_time_unit("ms"))
+        start_end_dt = [
+            {
+                "dt": sdt,
+                "event_code": 0,
+                "parameter": None,
+                "event_descriptor": None,
+                "ecp_code": "201-15",
+            },
+            {
+                "dt": edt,
+                "event_code": 0,
+                "parameter": None,
+                "event_descriptor": None,
+                "ecp_code": "200-15",
+            },
+        ]
+
+        se = pl.DataFrame(data=start_end_dt).with_columns(
+            pl.col("dt").dt.cast_time_unit("ms")
+        )
 
         # ? =================== Test Code ===================
         fi = flash_events.vstack(se).sort("dt")
         print(fi)
         # ? =================================================
 
-        flash_events = (
-            flash_events.vstack(se).sort("dt").select("dt").to_series().to_list()
-        )
+        flash_events = flash_events.vstack(se).sort("dt").to_dicts()
 
         i = 0
-        while i < len(flash_events):
-            nonFlashPeriod.append(flash_events[i : i + 2])
-            i += 2
-        print(nonFlashPeriod)
+        while i < len(flash_events) - 1:
+            if (
+                flash_events[i]["ecp_code"] == "201-15"
+                and flash_events[i + 1]["ecp_code"] == "200-15"
+            ):
+                nonFlashPeriod.append(
+                    (flash_events[i]["dt"], flash_events[i + 1]["dt"])
+                )
+                i += 1
+            else:
+                FlashPeriod.append((flash_events[i]["dt"], flash_events[i + 1]["dt"]))
+                i += 1
 
-        # ================================================
-        #    Create List of Flash Intervals/Periods
-        # ================================================
+        # print("nonFlashPeriods: ", nonFlashPeriod)
+        # print("FlashPeriods: ", FlashPeriod)
 
-        # i = 0
-        # while i < len(flash_events):
-        #     FlashInts.append(flash_events[i : i + 2])
-        #     i += 2
-
-    # Condition if no mmu flash detected
+    # If no mmu flash events detected
     else:
-        nonFlashPeriod = [[sdt, edt]]
+        nonFlashPeriod = [(sdt, edt)]
 
     # ================================================
     #       Determine Intervals for all events
-    # like phases, overlaps, etc
+    # like phases, overlaps, etc during nonFlashPeriods
     # ================================================
 
     interval_holder = []
