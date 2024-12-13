@@ -137,7 +137,7 @@ let danger_arr = [
 
 let ops_arr = ["200-5", "201-5", "200-48", "201-48"];
 let green_arr = [1, 61, 62];
-let yellow_arr = [8, 63];
+let amber_arr = [8, 63];
 let red_arr = [10, 64];
 
 // Grid Options: Contains all of the Data Grid configurations
@@ -151,7 +151,15 @@ const gridOptions = {
     { field: "dt", headerName: "Datetime" },
     { field: "event_code", headerName: "Event Code" },
     { field: "parameter", headerName: "Parameter" },
-    { field: "event_descriptor", headerName: "Event Descriptor" },
+    {
+      field: "event_descriptor",
+      headerName: "Event Descriptor",
+      cellClassRules: {
+        "rag-red": (params) => red_arr.includes(params.data.event_code),
+        "rag-amber": (params) => amber_arr.includes(params.data.event_code),
+        "rag-green": (params) => green_arr.includes(params.data.event_code),
+      },
+    },
     { field: "phase_status", headerName: "Phase Status" },
     { field: "ovl_status", headerName: "Overlap Status" },
     { field: "ops_status", headerName: "Operational Status" },
@@ -166,10 +174,13 @@ const gridOptions = {
   },
 
   rowClassRules: {
-    // apply red to Ford cars
-    "rag-red": (params) => red_arr.includes(params.data.event_code),
-    "rag-amber": (params) => yellow_arr.includes(params.data.event_code),
-    "rag-green": (params) => green_arr.includes(params.data.event_code),
+    "border-amber-start": (params) =>
+      amber_arr.includes(params.data.event_code),
+
+    "border-red-start": (params) => red_arr.includes(params.data.event_code),
+
+    "border-green-start": (params) =>
+      green_arr.includes(params.data.event_code),
 
     "rag-danger": (params) =>
       danger_arr.includes(
@@ -183,11 +194,12 @@ const gridOptions = {
           "-" +
           params.data.parameter.toString()
       ),
+    "rag-time": (params) => params.data.time_grp == "x",
   },
 
   rowSelection: {
     mode: "multiRow",
-    checkboxes: false,
+    checkboxes: true,
     enableClickSelection: true,
     enableSelectionWithoutKeys: true,
   },
