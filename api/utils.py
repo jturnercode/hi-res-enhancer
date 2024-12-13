@@ -243,12 +243,18 @@ def flash_periods(df_data: pl.DataFrame, sdt: datetime, edt: datetime):
 
     # Search for flash events in df_data
     # 200-15 (start flash), 201-15 (end flash)
+    # OR 173-6 (start flash), 173-2 (end flash)
+    #! TODO: Test to see what flash codes work better
+    start_flash_code = "173-6"
+    end_flash_code = "173-2"
+
+    # filter out flash events
     flash_events = df_data.with_columns(
         ecp_code=(
             pl.col("event_code").cast(pl.Utf8) + "-" + pl.col("parameter").cast(pl.Utf8)
         )
     ).filter(
-        pl.col("ecp_code").is_in(["200-15", "201-15"]),
+        pl.col("ecp_code").is_in([start_flash_code, end_flash_code]),
     )
 
     nonFlashPeriod = []
@@ -267,14 +273,14 @@ def flash_periods(df_data: pl.DataFrame, sdt: datetime, edt: datetime):
                 "event_code": 0,
                 "parameter": None,
                 "event_descriptor": None,
-                "ecp_code": "201-15",
+                "ecp_code": end_flash_code,
             },
             {
                 "dt": edt,
                 "event_code": 0,
                 "parameter": None,
                 "event_descriptor": None,
-                "ecp_code": "200-15",
+                "ecp_code": start_flash_code,
             },
         ]
 
@@ -292,8 +298,8 @@ def flash_periods(df_data: pl.DataFrame, sdt: datetime, edt: datetime):
         i = 0
         while i < len(flash_events) - 1:
             if (
-                flash_events[i]["ecp_code"] == "201-15"
-                and flash_events[i + 1]["ecp_code"] == "200-15"
+                flash_events[i]["ecp_code"] == end_flash_code
+                and flash_events[i + 1]["ecp_code"] == start_flash_code
             ):
                 nonFlashPeriod.append(
                     (flash_events[i]["dt"], flash_events[i + 1]["dt"])
