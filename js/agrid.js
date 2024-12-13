@@ -113,7 +113,7 @@ async function fetch_griddata() {
 
 // Flash codes to color text red
 let danger_arr = [
-  "173-6",
+  "173-6", // unit flash events
   "173-2",
   "173-5",
   "173-1",
@@ -121,17 +121,24 @@ let danger_arr = [
   "173-4",
   "173-7",
   "173-8",
-  "200-15",
+  "200-15", //flash alarm
   "201-15",
-  "200-2",
+  "200-2", //stop timing
   "201-2",
-  "200-1",
+  "200-1", //power up alarm
   "201-1",
-  "180-1",
+  "182-1", //power failure
+  "184-1", //power restored
+  "180-1", //Stop time
   "180-0",
+  "179-0", //Interval advance
+  "179-1",
 ];
 
 let ops_arr = ["200-5", "201-5", "200-48", "201-48"];
+let green_arr = [1, 61, 62];
+let yellow_arr = [8, 63];
+let red_arr = [10, 64];
 
 // Grid Options: Contains all of the Data Grid configurations
 const gridOptions = {
@@ -148,7 +155,7 @@ const gridOptions = {
     { field: "phase_status", headerName: "Phase Status" },
     { field: "ovl_status", headerName: "Overlap Status" },
     { field: "ops_status", headerName: "Operational Status" },
-    // { field: "parameter2", headerName: "Parameter 2" },
+    { field: "time_grp", headerName: "Time Group", hide: true },
     // { field: "duration" },
   ],
 
@@ -160,10 +167,9 @@ const gridOptions = {
 
   rowClassRules: {
     // apply red to Ford cars
-    "rag-red": (params) => params.data.event_descriptor.includes("Red"),
-    "rag-amber": (params) => params.data.event_descriptor.includes("Yellow"),
-    // TODO: only highlight green interval vs split?
-    "rag-green": (params) => params.data.event_descriptor.includes("Green"),
+    "rag-red": (params) => red_arr.includes(params.data.event_code),
+    "rag-amber": (params) => yellow_arr.includes(params.data.event_code),
+    "rag-green": (params) => green_arr.includes(params.data.event_code),
 
     "rag-danger": (params) =>
       danger_arr.includes(
