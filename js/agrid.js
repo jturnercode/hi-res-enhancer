@@ -1,4 +1,4 @@
-import { API_URL } from "./env.js";
+import { API_URL, APP_URL } from "./env.js";
 
 const locationSel = document.getElementById("locations");
 const start_dtInput = document.getElementById("start_dt");
@@ -80,6 +80,7 @@ async function fetchLocids() {
 
 async function fetch_griddata() {
   // TODO: ***add exception catch, return for ag grid
+  console.log("getting data------->");
 
   // default datetime has 'T' format; remove and split date/hour
   let sdt = start_dtInput.value.replace("T", " ");
@@ -136,9 +137,9 @@ let danger_arr = [
 ];
 
 let ops_arr = ["200-5", "201-5", "200-48", "201-48"];
-let green_arr = [1, 61, 62];
-let amber_arr = [8, 63];
-let red_arr = [10, 64];
+let green_arr_start = [1, 61, 62];
+let amber_arr_start = [8, 63];
+let red_arr_start = [10, 64];
 
 // Grid Options: Contains all of the Data Grid configurations
 const gridOptions = {
@@ -155,9 +156,11 @@ const gridOptions = {
       field: "event_descriptor",
       headerName: "Event Descriptor",
       cellClassRules: {
-        "rag-red": (params) => red_arr.includes(params.data.event_code),
-        "rag-amber": (params) => amber_arr.includes(params.data.event_code),
-        "rag-green": (params) => green_arr.includes(params.data.event_code),
+        "rag-red": (params) => red_arr_start.includes(params.data.event_code),
+        "rag-amber": (params) =>
+          amber_arr_start.includes(params.data.event_code),
+        "rag-green": (params) =>
+          green_arr_start.includes(params.data.event_code),
       },
     },
     { field: "phase_status", headerName: "Phase Status" },
@@ -175,12 +178,13 @@ const gridOptions = {
 
   rowClassRules: {
     "border-amber-start": (params) =>
-      amber_arr.includes(params.data.event_code),
+      amber_arr_start.includes(params.data.event_code),
 
-    "border-red-start": (params) => red_arr.includes(params.data.event_code),
+    "border-red-start": (params) =>
+      red_arr_start.includes(params.data.event_code),
 
     "border-green-start": (params) =>
-      green_arr.includes(params.data.event_code),
+      green_arr_start.includes(params.data.event_code),
 
     "rag-danger": (params) =>
       danger_arr.includes(
@@ -188,12 +192,14 @@ const gridOptions = {
           "-" +
           params.data.parameter.toString()
       ),
+
     "rag-ops": (params) =>
       ops_arr.includes(
         params.data.event_code.toString() +
           "-" +
           params.data.parameter.toString()
       ),
+
     "rag-time": (params) => params.data.time_grp == "x",
   },
 
@@ -239,13 +245,18 @@ document.addEventListener("DOMContentLoaded", function () {
    *    Get Data Button
    *========================**/
   getdataBtn.addEventListener("click", async function () {
+    // Validate start and end datetimes
     if (start_dtInput.value > end_dtInput.value) {
       end_dtInput.classList.add("is-danger");
       return 0;
     }
     end_dtInput.classList.remove("is-danger");
-
     await fetch_griddata();
+
+    // Set newURl in browser but do not reload page
+    // Used in case user wants to copy and send as link
+    let newURL = `${APP_URL}/agrid_index.html?startdt=${start_dtInput.value}&enddt=${end_dtInput.value}&locid=${locationSel.value}`;
+    window.history.pushState({}, "", newURL);
   });
 
   /**======================
@@ -269,6 +280,8 @@ document.addEventListener("DOMContentLoaded", function () {
 window.onload = async function () {
   // **onload WAITs TO LOAD LOCATIONS IN Locations SELECT ELEMENT
   await fetchLocids();
+
+  console.log("---on load");
 
   // IF QUERY PARAMETERS PASSED, SET location and datetimes
   // USED for automated links that may be triggered by other apps

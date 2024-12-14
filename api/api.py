@@ -12,9 +12,8 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    # TODO: set correct origins for production
-    allow_origins=["http://127.0.0.1:5500"],
-    # allow_origins=["*"],
+    # allow_origins=["http://127.0.0.1:5500"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -131,7 +130,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
 
     # Add status columns as list type to df_data
     df_data = df_data.with_columns(
-        phase_status=[], ovl_status=[], ops_status=[], time_grp=[]
+        phase_status=[], ovl_status=[], ops_status=[], time_grp=None
     )
 
     # ================================================
@@ -204,7 +203,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     # =================== Single Event Ops Code ================
     # Events that only have a start but no end codes
     se = [(111, "PreExit")]
-
+    # TODO: Remove hard coded events from here and add to file or db
     # TODO: set all events at detected event time vs just one event
     for e in se:
         df_data = df_data.with_columns(
@@ -239,7 +238,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     for i in ints:
         df_data = df_data.with_columns(
             time_grp=pl.when(pl.col("dt").is_between(i[0], i[1], closed="left"))
-            .then(pl.col("time_grp").list.concat(pl.lit("x")))
+            .then(pl.lit("x"))
             .otherwise(pl.col("time_grp"))
         )
 
