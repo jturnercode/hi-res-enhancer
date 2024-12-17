@@ -289,8 +289,8 @@ def flash_periods(df_data: pl.DataFrame, sdt: datetime, edt: datetime):
         )
 
         # ? =================== Test Code ===================
-        fi = flash_events.vstack(se).sort("dt")
-        print(fi)
+        # fi = flash_events.vstack(se).sort("dt")
+        # print(fi)
         # ? =================================================
 
         flash_events = flash_events.vstack(se).sort("dt").to_dicts()

@@ -1,33 +1,31 @@
 {
-    "listeners":{
-        "*:80": {
-            "pass": "routes"
-        },
-        "*:8000":{
-            "pass":"applications/fastapi"
-        }
-
+  "listeners": {
+    "*:80": {
+      "pass": "routes/main"
     },
+    "*:8000": {
+      "pass": "applications/fastapi"
+    }
+  },
 
-    "applications":{
-        "fastapi":{
-            "type":"python 3",
-            "path":"/api/",
-            "module": "api",
-            "callable": "app"
-        }
-    },
+  "applications": {
+    "fastapi": {
+      "type": "python 3",
+      "path": "/api/",
+      "module": "api",
+      "callable": "app"
+    }
+  },
 
-    "routes": [
-        {
-            "action": { 
-                "share": "/www/$uri",
-                "types": [
-                    "text/css",
-                    "image/png",
-                    "application/javascript"
-                ]
-            }
+  "routes": {
+    "main": [
+      {
+        "action": {
+          "share": "/www/$uri",
+          "index": "index.html",
+          "types": ["text/css", "image/png", "application/javascript"]
         }
+      }
     ]
+  }
 }

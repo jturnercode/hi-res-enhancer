@@ -255,7 +255,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Set newURl in browser but do not reload page
     // Used in case user wants to copy and send as link
-    let newURL = `${APP_URL}/agrid_index.html?startdt=${start_dtInput.value}&enddt=${end_dtInput.value}&locid=${locationSel.value}`;
+    let newURL = `${APP_URL}/?startdt=${start_dtInput.value}&enddt=${end_dtInput.value}&locid=${locationSel.value}`;
     window.history.pushState({}, "", newURL);
   });
 
