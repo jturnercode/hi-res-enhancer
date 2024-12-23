@@ -233,13 +233,19 @@ def singles_wparams(df_ecodes: pl.DataFrame, df_data: pl.DataFrame) -> pl.DataFr
 
 
 def flash_periods(df_data: pl.DataFrame, sdt: datetime, edt: datetime):
+    """Determine nonFlash and Flash periods.
+    During signal flash existing events are terminated
+    Flash periods will help determine stop or starting points
+    for events; especially orphan events terminated by flash
 
-    # ================================================
-    #          DETERMINE MMU FLASH PERIODS
-    # During signal flash existing events are terminated
-    # Flash periods will help determine stop or starting points
-    # for events;  especially orphan events terminated by flash
-    # ================================================
+    Args:
+        df_data (pl.DataFrame): df to process
+        sdt (datetime): start datetime
+        edt (datetime): end datetime
+
+    Returns:
+        _type_: nonFlashPeriods and flashPeriods in list of tuples format
+    """
 
     # Search for flash events in df_data
     # 200-15 (start flash), 201-15 (end flash)
@@ -284,6 +290,7 @@ def flash_periods(df_data: pl.DataFrame, sdt: datetime, edt: datetime):
             },
         ]
 
+        # start and end events in df form
         se = pl.DataFrame(data=start_end_dt).with_columns(
             pl.col("dt").dt.cast_time_unit("ms")
         )
