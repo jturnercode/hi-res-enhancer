@@ -183,18 +183,18 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     # ================================================
 
     phase_int = nonFlashEventInts.filter(
-        pl.col("event_code").is_in([102, 105, 106, 107, 111, 182])
+        pl.col("event_code").is_in([32, 102, 105, 106, 107, 111, 182])
     )
 
-    for int in phase_int.to_dicts():
+    for interval in phase_int.to_dicts():
 
         df_data = df_data.with_columns(
             ops_status=pl.when(
-                pl.col("dt").is_between(int["dt"], int["dt2"], closed="left")
+                pl.col("dt").is_between(interval["dt"], interval["dt2"], closed="left")
             )
             .then(
                 pl.col("ops_status").list.concat(
-                    [str(int["parameter"]) + pl.lit(int["abbr"])]
+                    [str(interval["parameter"]) + pl.lit(interval["abbr"])]
                 )
             )
             .otherwise(pl.col("ops_status"))
