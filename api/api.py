@@ -139,7 +139,11 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
 
     # Add status columns as list type to df_data
     df_data = df_data.with_columns(
-        phase_status=[], ovl_status=[], ops_status=[], time_grp=None
+        phase_status=[],
+        ovl_status=[],
+        ops_status=[],
+        time_grp=None,
+        time_increment=None,
     )
 
     # ================================================
@@ -232,39 +236,42 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
 
     # ================================================
     #                Group Events by DT
-    # Ag grid will highlight to be able to quickly distinguish
+    # Ag grid will highlight rows with same
+    # time to be able to quickly distinguish
     # time change
     # ================================================
-    # TODO: calculate time between previous event shown in grid; helps review of events
 
-    time_grp = df_data.select(pl.col("dt").unique().sort()).to_series().to_list()
+    # find unique times in df_data
+    time_grps = df_data.select(pl.col("dt").unique().sort()).to_series().to_list()
 
-    ints = []
-    i = 0
-    while i < len(time_grp) - 1:
-        ints.append((time_grp[i], time_grp[i + 1]))
-        i += 2
+    # Select all odd number datetimes to mark with x
+    # used to highlight in ag grid
+    x_grps = time_grps[::2]
 
-    for i in ints:
+    for dt in x_grps:
         df_data = df_data.with_columns(
-            time_grp=pl.when(pl.col("dt").is_between(i[0], i[1], closed="left"))
+            time_grp=pl.when(pl.col("dt") == dt)
             .then(pl.lit("x"))
-            .otherwise(pl.col("time_grp"))
+            .otherwise(pl.col("time_grp")),
         )
 
     # ================================================
-    #     Add locid column and sort/formatting
+    #                TIME INCREMENT CALC
+    # Calculate time diff between time groups
+    #
+    # *If i did not mind 0 or blanks, try using
+    # *time_increment = pl.col("dt").diff(). then filter out '0'
+    #
+    # NOTE: we start at second value to skip first time_grp
     # ================================================
-    df_data = (
-        df_data.sort(by=["dt", "event_code"]).select(
-            pl.lit(locid).alias("loc_id"),
-            pl.all(),
+    ind = 1
+    for dt in time_grps[1:]:
+        df_data = df_data.with_columns(
+            time_increment=pl.when(pl.col("dt") == dt)
+            .then(time_grps[ind] - time_grps[ind - 1])
+            .otherwise(pl.col("time_increment")),
         )
-        # Format dates to string and round off duration
-        .with_columns(
-            pl.col("dt").dt.strftime(r"%Y-%m-%d %H:%M:%S%.3f"),
-        )
-    )
+        ind += 1
 
     # ================================================
     #            MODIFY EVENT DESCRIPTIONS
@@ -277,11 +284,20 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
         )
     )
 
-    # ? Test code
-    # df_data = df_data.filter(
-    #     pl.col("event_code").is_in([200, 201, 173]),
-    #     pl.col("parameter").is_in([15, 5, 6, 7, 2, 3, 8, 1]),
-    # )
+    # ================================================
+    #     Add locid column, sort, & formatting
+    # ================================================
+    df_data = (
+        df_data.sort(by=["dt", "event_code"]).select(
+            pl.lit(locid).alias("loc_id"),
+            pl.all(),
+        )
+        # Format dates to string and round off duration
+        .with_columns(
+            pl.col("dt").dt.strftime(r"%Y-%m-%d %H:%M:%S%.3f"),
+            (pl.col("time_increment").dt.total_milliseconds() / 1000).round(1),
+        )
+    )
 
     return df_data
 
@@ -309,9 +325,9 @@ async def get_hires_grid(
 
     numberOfHrs = (enddt - startdt).total_seconds() // (3600)
 
-    if numberOfHrs > 24:
+    if numberOfHrs > 12:
         print("Too much data")
-        # TODO: return message that to much data requested
+        # TODO: return message that to much data requested; TEST LIMITS?
         return pl.DataFrame().to_dicts()
 
     df_hres = process_hires(locid=locid, sdate=startdt, edate=enddt)
