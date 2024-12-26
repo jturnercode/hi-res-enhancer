@@ -135,7 +135,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
             old=ec_pairs["event_start"], new=ec_pairs["abbr"]
         )
     )
-    print(nonFlashEventInts)
+    # print(nonFlashEventInts)
 
     # Add status columns as list type to df_data
     df_data = df_data.with_columns(
@@ -235,6 +235,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     # Ag grid will highlight to be able to quickly distinguish
     # time change
     # ================================================
+    # TODO: calculate time between previous event shown in grid; helps review of events
 
     time_grp = df_data.select(pl.col("dt").unique().sort()).to_series().to_list()
 
@@ -265,13 +266,23 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
         )
     )
 
+    # ================================================
+    #            MODIFY EVENT DESCRIPTIONS
+    # Add phase numbers to event descriptions
+    # ================================================
+
+    df_data = df_data.with_columns(
+        pl.col("event_descriptor").str.replace(
+            pattern="[#]", value=pl.col("parameter"), literal=True
+        )
+    )
+
     # ? Test code
     # df_data = df_data.filter(
     #     pl.col("event_code").is_in([200, 201, 173]),
     #     pl.col("parameter").is_in([15, 5, 6, 7, 2, 3, 8, 1]),
     # )
 
-    # TODO: calculate time between previous event shown in grid; helps review of events
     return df_data
 
 

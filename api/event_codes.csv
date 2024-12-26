@@ -1,52 +1,52 @@
 event_code,event_descriptor
-0,Phase On
-1,Phase Begin Green
-2,Phase Check
-3,Phase Min Complete
-4,Phase Gap Out
-5,Phase Max Out
-6,Phase Force Off
-7,Phase Green Termination
-8,Phase Begin YellowClearance
-9,Phase End YellowClearance
-10,Phase Begin RedClearance
-11,Phase End RedClearance
-12,Phase Inactive
+0,Phase [#] On
+1,Phase [#] Begin Green
+2,Phase [#] Check
+3,Phase [#] Min Complete
+4,Phase [#] Gap Out
+5,Phase [#] Max Out
+6,Phase [#] Force Off
+7,Phase [#] Green Termination
+8,Phase [#] Begin YellowClearance
+9,Phase [#] End YellowClearance
+10,Phase [#] Begin RedClearance
+11,Phase [#] End RedClearance
+12,Phase [#] Inactive
 13,Extension Timer Gap Out
-14,Phase Skipped
+14,Phase [#] Skipped
 15,Extension Timer Reduction Start
 16,Extension Timer Min Achieved
 17,Add Initial Complete
 18,Next Phase Decision
-20,Preemption Force Off
-21,Pedestrian Begin Walk
-22,Pedestrian Begin Clearance
-23,Pedestrian End Clearance
-24,Pedestrian Dark
-31,Barrier Termination
-32,FYA Begin Permissive
-33,FYA End Permissive
-41,Phase Hold Active
-42,Phase Hold Released
-43,Phase Call Registered
-44,Phase Call Dropped
-45,Pedestrian CallRegistered
-46,Phase Omit On
-47,Phase Omit Off
-48,Pedestrian Omit On
-49,Pedestrian Omit Off
-50,Max I In-Effect
-51,Max 2 In-Effect
-61,Overlap Begin Green
-62,Overlap Begin TrailingGreen (Extension)
-63,Overlap Begin Yellow
-64,Overlap Begin RedClearance
-65,Overlap Off (Inactive withred indication)
-66,Overlap Dark
-67,Pedestrian Overlap BeginWalk
-68,Pedestrian Overlap BeginClearance
-69,Pedestrian Overlap BeginSolid Don't Walk
-70,Pedestrian Overlap Dark
+20,Preemption [#] Force Off
+21,Pedestrian [#] Begin Walk
+22,Pedestrian [#] Begin Clearance
+23,Pedestrian [#] End Clearance
+24,Pedestrian [#] Dark
+31,Barrier [#] Termination
+32,FYA [#] Begin Permissive
+33,FYA [#] End Permissive
+41,Phase [#] Hold Active
+42,Phase [#] Hold Released
+43,Phase [#] Call Registered
+44,Phase [#] Call Dropped
+45,Pedestrian [#] Call Registered
+46,Phase [#] Omit On
+47,Phase [#] Omit Off
+48,Pedestrian [#] Omit On
+49,Pedestrian [#] Omit Off
+50,Max I In-Effect ([#])
+51,Max 2 In-Effect ([#])
+61,Overlap [#] Begin Green
+62,Overlap [#] Begin TrailingGreen (Extension)
+63,Overlap [#] Begin Yellow
+64,Overlap [#] Begin RedClearance
+65,Overlap [#] Off (Inactive withred indication)
+66,Overlap [#] Dark
+67,Pedestrian [#] Overlap BeginWalk
+68,Pedestrian [#] Overlap BeginClearance
+69,Pedestrian [#] Overlap BeginSolid Don't Walk
+70,Pedestrian [#] Overlap Dark
 81,Detector Off
 82,Detector On
 83,Detector Restored
@@ -55,26 +55,26 @@ event_code,event_descriptor
 86,Detector Fault- OpenLoop Fault
 87,Detector Fault- ShortedLoop Fault
 88,Detector Fault- ExcessiveChange Fault
-89,PedDetector Off
-90,PedDetector On
-91,Pedestrian DetectorFailed
-92,Pedestrian DetectorRestored
+89,PedDetector [#] Off
+90,PedDetector [#] On
+91,Pedestrian [#] Detector Failed
+92,Pedestrian [#] Detector Restored
 101,Preempt AdvanceWarning Input
-102,Preempt (Call) Input On
-103,Preempt Gate DownInput Received
-104,Preempt (Call) Input Off
-105,Preempt Entry Started
-106,Preemption Begin TrackClearance
-107,Preemption Begin DwellService
+102,Preempt [#] (Call) Input On
+103,Preempt [#] Gate DownInput Received
+104,Preempt [#] (Call) Input Off
+105,Preempt [#] Entry Started
+106,Preemption [#] Begin TrackClearance
+107,Preemption [#] Begin DwellService
 108,Preemption Link ActiveOn
 109,Preemption Link ActiveOff
-110,Preemption MaxPresence Exceeded
-111,Preemption Begin Exit Interval
+110,Preemption [#] MaxPresence Exceeded
+111,Preemption [#] Begin Exit Interval
 112,TSP Check In
 113,TSP Adjustment to EarlyGreen
 114,TSP Adjustment toExtend Green
 115,TSP Check Out
-116,Preemption Force Off
+116,Preemption [#] Force Off
 131,Coord Pattern Change
 132,Cycle Length Change
 133,Offset Length Change

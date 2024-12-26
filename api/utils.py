@@ -267,9 +267,9 @@ def event_intervals(
             )["parameter"].unique()
 
             for param in eventcode_params:
-                print(
-                    f"ec_start: {ec_pair['event_start']}, ec_end: {ec_pair['event_end']}: param: {param}"
-                )
+                # print(
+                #     f"ec_start: {ec_pair['event_start']}, ec_end: {ec_pair['event_end']}: param: {param}"
+                # )
 
                 df_ec = current_period.filter(
                     pl.col("event_code").is_in(
