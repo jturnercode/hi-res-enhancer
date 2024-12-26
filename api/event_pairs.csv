@@ -8,9 +8,10 @@ event_start,event_end,event_description,abbr
 61,63,Overlap Green,g
 62,61,Overlap Begin TrailingGreen (MinGrn),TG
 63,64,Overlap Yellow,y
-64,65,Overlap Red,r
+64,65-32,Overlap Red,r
 67,68,Pedestrian Overlap BeginWalk,ow
 68,69,Pedestrian Overlap BeginClearance,odw
+82,81,Detector On/Off,detOn
 84,83,Veh Detector Failure,vehDetFail
 90,89,Ped Detector On/Off,pedDet
 91,92,Ped Detector Failure,pedFail

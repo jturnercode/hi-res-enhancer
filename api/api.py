@@ -32,14 +32,19 @@ async def root():
 # ===========================
 #  * Load Event code data
 # ===========================
-# TODO: save to db to deploy on server or package in docker
+# TODO: save codes to db to deploy on server?? works fine with csv.
 # event codes with descriptions
 ec = pl.read_csv(source="api/event_codes.csv")
 
 # event code pairs
 exclude = [200, 82]
-ec_pairs: pl.DataFrame = pl.read_csv("api/event_pairs.csv").filter(
-    ~pl.col("event_start").is_in(exclude)
+ec_pairs: pl.DataFrame = (
+    pl.read_csv("api/event_pairs.csv")
+    # some event codes have multiple event_end codes (ex. overlap red for FYA)
+    # made event_end into list to accomodate multiple values
+    .with_columns(
+        event_end=pl.col("event_end").str.split(by="-").cast(pl.List(pl.Int32))
+    ).filter(~pl.col("event_start").is_in(exclude))
 )
 
 # single event codes
@@ -92,18 +97,21 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
         event_descriptor=pl.col("event_code").replace_strict(
             old=ec["event_code"], new=ec["event_descriptor"], default="unknown?"
         )
-        # Filter out events that did not start between sdate & edate
     ).filter(
+        # Filter out events that start between sdate & edate
         pl.col("dt").is_between(sdate, edate),
         # REMOVE DETECTOR EVENTS
         ~pl.col("event_code").is_in([81, 82]),
     )
 
+    # TODO: get all unique event codes to iterate less?
+
     print("----** Start data size: ", df_data.shape)
 
     # ================================================
     #  *        Single Event Codes w/Parmameters
-    #   Modify Events code descriptors that change with parameter#
+    #   Modify Events code descriptors that change with
+    #  parameter number
     # ================================================
 
     df_data = utils.singles_wparams(ec_single_wparams, df_data)
@@ -121,12 +129,13 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     )
 
     # Add abbr column to non Flash interval results
+    # map abbr from ec_pairs to event_code col in nonFlashEventInts df
     nonFlashEventInts = nonFlashEventInts.with_columns(
         abbr=pl.col("event_code").replace_strict(
             old=ec_pairs["event_start"], new=ec_pairs["abbr"]
         )
     )
-    # print(nonFlashEventInts)
+    print(nonFlashEventInts)
 
     # Add status columns as list type to df_data
     df_data = df_data.with_columns(
