@@ -148,7 +148,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
 
     # ================================================
     # *             Add Phase Status Info
-    #  ???
+    #  Add phase status info to phase status column
     # ================================================
 
     phase_int = nonFlashEventInts.filter(pl.col("event_code").is_in([1, 8, 10, 21, 22]))
@@ -169,7 +169,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
 
     # ================================================
     # *             Add Overlap Status Info
-    #  ???
+    #  Add info to overlap status column
     # ================================================
 
     phase_int = nonFlashEventInts.filter(
@@ -192,7 +192,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
 
     # ================================================
     # *             Add Operational Status Info
-    #  ???
+    #  Add info to ops status column
     # ================================================
 
     phase_int = nonFlashEventInts.filter(
@@ -213,8 +213,11 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
             .otherwise(pl.col("ops_status"))
         )
 
-    # =================== Single Event Ops Code ================
-    # Events that only have a start but no end codes
+    # ================================================
+    # *               Single Event Ops Codes
+    # Add events to ops status column
+    # that only have a start but no end codes
+    # ================================================
     se = [(111, "PreExit")]
     # TODO: Remove hard coded events from here and add to file or db
     # TODO: set all events at detected event time vs just one event
@@ -225,7 +228,10 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
             .otherwise(pl.col("ops_status"))
         )
 
-    # ============= Add Flash events to ops status ==============
+    # ================================================
+    # *               Flash events
+    # Add to ops status column
+    # ================================================
     for int in fPeriods:
 
         df_data = df_data.with_columns(
@@ -235,7 +241,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
         )
 
     # ================================================
-    #                Group Events by DT
+    # *               Group Events by DT
     # Ag grid will highlight rows with same
     # time to be able to quickly distinguish
     # time change
@@ -256,7 +262,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
         )
 
     # ================================================
-    #                TIME INCREMENT CALC
+    #  *              TIME INCREMENT CALC
     # Calculate time diff between time groups
     #
     # *If i did not mind 0 or blanks, try using
@@ -274,7 +280,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
         ind += 1
 
     # ================================================
-    #            MODIFY EVENT DESCRIPTIONS
+    #  *          MODIFY EVENT DESCRIPTIONS
     # Add phase numbers to event descriptions
     # ================================================
 

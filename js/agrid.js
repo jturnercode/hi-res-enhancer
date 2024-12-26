@@ -112,7 +112,7 @@ async function fetch_griddata() {
  * *              AG Grid Code
  *=============================================**/
 
-// Flash codes to color text red
+// Event codes to color text red
 let danger_arr = [
   "173-6", // unit flash events
   "173-2",
@@ -134,9 +134,15 @@ let danger_arr = [
   "180-0",
   "179-0", //Interval advance
   "179-1",
+  "200-21", // SDLC Fault
+  "201-21",
+  "200-31", //Cabinet Flash
+  "201-31",
 ];
 
-let ops_arr = ["200-5", "201-5", "200-48", "201-48"];
+// Event codes to color text blue
+let ops_arr = ["200-5", "201-5", "200-48", "201-48", "200-73", "201-73"];
+
 let green_arr_start = [1, 61, 62];
 let amber_arr_start = [8, 63];
 let red_arr_start = [10, 64];
