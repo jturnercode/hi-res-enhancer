@@ -29,12 +29,25 @@ async def root():
     return {"message": "Hello, Root!"}
 
 
+# ================================================
+# *               EXCLUDE EVENTS
+# Events that will not show up in final results
+#
+# REMOVE DETECTOR EVENTS (81,82)
+# REMOVE Alarm change events (175)
+# NOTE: event pairs also has a seperate exclude clause
+# TODO: exclude split change codes (134-149) & (203-218)?
+# ================================================
+
+exclude_events = [81, 82, 175]
+
 # ===========================
 #  * Load Event code data
 # ===========================
 # TODO: save codes to db to deploy on server?? works fine with csv.
 # event codes with descriptions
 ec = pl.read_csv(source="api/event_codes.csv")
+
 
 # event code pairs
 exclude = [200, 82]
@@ -92,19 +105,19 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     # Read, clean, and concat csv files
     df_data: pl.DataFrame = utils.clean_csvs(dir_list, path)
 
-    # Use series to map values from df to another df, great feature!!
-    df_data = df_data.with_columns(
+    # Select only events codes that should show in final results
+    # & map event descriptor to df_data
+    df_data = df_data.filter(
+        # Filter out events that start between sdate & edate
+        pl.col("dt").is_between(sdate, edate),
+        # events to exclude
+        ~pl.col("event_code").is_in(exclude_events),
+    ).with_columns(
+        # Use series to map values from df to another df, great feature!!
         event_descriptor=pl.col("event_code").replace_strict(
             old=ec["event_code"], new=ec["event_descriptor"], default="unknown?"
         )
-    ).filter(
-        # Filter out events that start between sdate & edate
-        pl.col("dt").is_between(sdate, edate),
-        # REMOVE DETECTOR EVENTS
-        ~pl.col("event_code").is_in([81, 82]),
     )
-
-    # TODO: get all unique event codes to iterate less?
 
     print("----** Start data size: ", df_data.shape)
 
@@ -294,7 +307,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     #     Add locid column, sort, & formatting
     # ================================================
     df_data = (
-        df_data.sort(by=["dt", "event_code"]).select(
+        df_data.sort(by=["dt", "event_code", "parameter"]).select(
             pl.lit(locid).alias("loc_id"),
             pl.all(),
         )
