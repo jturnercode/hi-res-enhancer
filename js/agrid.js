@@ -114,12 +114,12 @@ async function fetch_griddata() {
 
 // Event codes to color text red
 let danger_arr = [
-  "173-6", // unit flash events
+  "173-1", // unit flash events (173)
   "173-2",
-  "173-5",
-  "173-1",
   "173-3",
   "173-4",
+  "173-5",
+  "173-6",
   "173-7",
   "173-8",
   "200-15", //flash alarm
@@ -132,12 +132,16 @@ let danger_arr = [
   "184-1", //power restored
   "180-1", //Stop time
   "180-0",
-  "179-0", //Interval advance
+  "179-0", // Interval advance
   "179-1",
   "200-21", // SDLC Fault
   "201-21",
-  "200-31", //Cabinet Flash
+  "200-31", // Cabinet Flash
   "201-31",
+  "200-20", // Controller Fault
+  "201-20",
+  "200-23", // TermFacility SDLC fault
+  "201-23",
 ];
 
 // Event codes to color text blue
