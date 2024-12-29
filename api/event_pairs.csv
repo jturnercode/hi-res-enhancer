@@ -16,7 +16,7 @@ event_start,event_end,event_description,abbr
 90,89,Ped Detector On/Off,pedDet
 91,92,Ped Detector Failure,pedFail
 102,104,Preempt Input On,PreInput
-105,106,Preempt Entry Started,PreEntry
+105,106-107,Preempt Entry Started,PreEntry
 106,107,Preempt Track Clear,preTrk
 107,111,Preempt Dwell,preDwl
 182,184,Power Failure,pwrFail
