@@ -126,10 +126,7 @@ let danger_arr = [
   "201-15",
   "200-2", //stop timing
   "201-2",
-  "200-1", //power up alarm
-  "201-1",
   "182-1", //power failure
-  "184-1", //power restored
   "180-1", //Stop time
   "180-0",
   "179-0", // Interval advance
@@ -145,7 +142,17 @@ let danger_arr = [
 ];
 
 // Event codes to color text blue
-let ops_arr = ["200-5", "201-5", "200-48", "201-48", "200-73", "201-73"];
+let ops_arr = [
+  "184-1", //power restored
+  "200-1", //power up alarm
+  "201-1",
+  "200-5",
+  "201-5",
+  "200-48",
+  "201-48",
+  "200-73",
+  "201-73",
+];
 
 let green_arr_start = [1, 61, 62];
 let amber_arr_start = [8, 63];
