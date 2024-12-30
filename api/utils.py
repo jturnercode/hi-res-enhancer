@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 import polars as pl
 
 
@@ -150,17 +150,30 @@ def flash_periods(df_data: pl.DataFrame, sdt: datetime, edt: datetime):
     # Search for flash events in df_data
     # 200-15 (start flash), 201-15 (end flash)
     # OR 173-6 (start flash), 173-2 (end flash)
+
     #! TODO: Test to see what flash codes work better; SEE GRANTS LAKE FLASH EVENT ON 12-23
-    start_flash_code = "173-6"
-    end_flash_code = "173-2"
+    # other, automatic, local, cu, mmu, startup, preempt flash
+    # flash_codes = ["173-1", "173-3", "173-4", "173-5", "173-6", "173-7", "173-8"]
+    # exit_flash_code = "173-2"
+    ec_map = {
+        "173-1": 1,
+        "173-2": 0,
+        "173-3": 1,
+        "173-4": 1,
+        "173-5": 1,
+        "173-6": 1,
+        "173-7": 1,
+        "173-8": 1,
+    }
 
     # filter out flash events
     flash_events = df_data.with_columns(
-        ecp_code=(
+        ec_param_code=(
             pl.col("event_code").cast(pl.Utf8) + "-" + pl.col("parameter").cast(pl.Utf8)
-        )
+        ).replace_strict(ec_map, default=-1)
     ).filter(
-        pl.col("ecp_code").is_in([start_flash_code, end_flash_code]),
+        # pl.col("ec_param_code").is_in([*flash_codes, exit_flash_code]),
+        pl.col("ec_param_code").is_in([0, 1]),
     )
 
     nonFlashPeriod = []
@@ -170,8 +183,24 @@ def flash_periods(df_data: pl.DataFrame, sdt: datetime, edt: datetime):
     if flash_events.height > 0:
 
         # ============================================
-        #   Add sdt & edt to detected flash intervals
+        #   Add sdt & edt rows to detected flash intervals
         # ============================================
+
+        # sdt_code = "173-2"
+        sdt_code = 0
+        fil_val = 1
+        # if flash_events["ec_param_code"].first() == "173-2":
+        if flash_events["ec_param_code"].first() == 0:
+            # sdt_code = flash_codes[0]
+            sdt_code = 1
+            fil_val = 0
+
+        # edt_code = "173-2"
+        edt_code = 0
+        # if flash_events["ec_param_code"].last() == "173-2":
+        if flash_events["ec_param_code"].last() == 0:
+            # edt_code = flash_codes[0]
+            edt_code = 1
 
         start_end_dt = [
             {
@@ -179,14 +208,14 @@ def flash_periods(df_data: pl.DataFrame, sdt: datetime, edt: datetime):
                 "event_code": 0,
                 "parameter": None,
                 "event_descriptor": None,
-                "ecp_code": end_flash_code,
+                "ec_param_code": sdt_code,
             },
             {
                 "dt": edt,
                 "event_code": 0,
                 "parameter": None,
                 "event_descriptor": None,
-                "ecp_code": start_flash_code,
+                "ec_param_code": edt_code,
             },
         ]
 
@@ -200,13 +229,23 @@ def flash_periods(df_data: pl.DataFrame, sdt: datetime, edt: datetime):
         # print(fi)
         # ? =================================================
 
-        flash_events = flash_events.vstack(se).sort("dt").to_dicts()
+        flash_events = (
+            flash_events.vstack(se)
+            .sort("dt")
+            .filter(
+                pl.col("ec_param_code")
+                != pl.col("ec_param_code").shift(n=1, fill_value=fil_val)
+            )
+            .to_dicts()
+        )
 
         i = 0
         while i < len(flash_events) - 1:
             if (
-                flash_events[i]["ecp_code"] == end_flash_code
-                and flash_events[i + 1]["ecp_code"] == start_flash_code
+                # flash_events[i]["ec_param_code"] == exit_flash_code
+                flash_events[i]["ec_param_code"] == 0
+                # and flash_events[i + 1]["ec_param_code"] in flash_codes
+                and flash_events[i + 1]["ec_param_code"] == 1
             ):
                 nonFlashPeriod.append(
                     (flash_events[i]["dt"], flash_events[i + 1]["dt"])
@@ -216,12 +255,11 @@ def flash_periods(df_data: pl.DataFrame, sdt: datetime, edt: datetime):
                 flashPeriod.append((flash_events[i]["dt"], flash_events[i + 1]["dt"]))
                 i += 1
 
-        # print("nonFlashPeriods: ", nonFlashPeriod)
-        # print("FlashPeriods: ", flashPeriod)
-
     # If no mmu flash events detected
-    else:
-        nonFlashPeriod = [(sdt, edt)]
+    nonFlashPeriod = [(sdt, edt)]
+
+    # print("nonFlashPeriods: ", nonFlashPeriod)
+    # print("FlashPeriods: ", flashPeriod)
 
     return nonFlashPeriod, flashPeriod
 
@@ -258,7 +296,7 @@ def event_intervals(
             pl.col("dt").is_between(period[0], period[1]),
         )
 
-        # TODO: would it be worth filter out only ecodes in df??
+        # iterates only pairs with parameters, if pair does not exit it is skipped
         for ec_pair in ec_pairs.to_dicts():
 
             # Return series of all unigue parameters codes for current event_start codes
@@ -267,6 +305,8 @@ def event_intervals(
             )["parameter"].unique()
 
             for param in eventcode_params:
+
+                # Test code
                 # print(
                 #     f"ec_start: {ec_pair['event_start']}, ec_end: {ec_pair['event_end']}: param: {param}"
                 # )
@@ -279,10 +319,12 @@ def event_intervals(
                 )
 
                 # Test code to see pattern of multi pair scenerios
-                # if ec_pair["event_start"] == 64:
-                #     print(df_ec)
-                #     df_ec.write_csv("dfec.csv")
-                #     df_ec.write_csv("current.csv")
+                # if ec_pair["event_start"] in [62]:
+                # print(df_ec)
+                # continue
+
+                # df_ec.write_csv("dfec.csv")
+                # current_period.write_csv("current.csv")
 
                 # ================================================
                 #      Orphan Event From Previous Period
@@ -294,20 +336,21 @@ def event_intervals(
                 # ie: orphaned events that started prior to requested time
                 # *The added assumed event start times are marked
                 # *with '**' in the Event descriptor
+                # TODO: removed as it was blurring results due to multiple end event code possibilities, revisit in future
                 # ================================================
-                if df_ec["event_code"].item(0) in ec_pair["event_end"]:
+                # if df_ec["event_code"].first() in ec_pair["event_end"]:
 
-                    new_row = [period[0], ec_pair["event_start"], param, "**"]
+                #     new_row = [period[0], ec_pair["event_start"], param, "**"]
 
-                    new = pl.DataFrame(
-                        data=[new_row],
-                        schema=["dt", "event_code", "parameter", "event_descriptor"],
-                        orient="row",
-                        # Have to cast dt to milliseconds
-                    ).with_columns(pl.col("dt").dt.cast_time_unit("ms"))
+                #     new = pl.DataFrame(
+                #         data=[new_row],
+                #         schema=["dt", "event_code", "parameter", "event_descriptor"],
+                #         orient="row",
+                #         # Have to cast dt to milliseconds
+                #     ).with_columns(pl.col("dt").dt.cast_time_unit("ms"))
 
-                    # Concat old to new df
-                    df_ec = pl.concat(items=[new, df_ec], how="vertical")
+                #     # Concat old to new df
+                #     df_ec = pl.concat(items=[new, df_ec], how="vertical")
 
                 # ================================================
                 #      Orphan Events at End of Period
@@ -320,7 +363,7 @@ def event_intervals(
                 # *The added assumed event end times are marked
                 # *with '**' in the Event descriptor
                 # ================================================
-                if df_ec["event_code"].item(df_ec.height - 1) == ec_pair["event_start"]:
+                if df_ec["event_code"].last() == ec_pair["event_start"]:
 
                     #! Add arbituary event_end code[0]; should not matter?
                     new_row = [period[1], ec_pair["event_end"][0], param, "**"]
@@ -346,9 +389,10 @@ def event_intervals(
                 # period but now handle these events w/added logic
                 # ================================================
 
+                # Only for pairs with 2 unique codes
                 if len(ec_pair["event_end"]) == 1:
 
-                    # TODO: fill value with event_end[1] is an assumption that can fail...need long term solution
+                    # TODO: fill value with event_end[1] is an assumption that can fail?...better long term solution?
                     # Becasue ec-pair-event_end is a list, we assume
                     #  second event_code to use as fill_vallue
                     fill_val = df_ec["event_code"].item(1)
@@ -358,27 +402,32 @@ def event_intervals(
                         != pl.col("event_code").shift(n=1, fill_value=fill_val)
                     )
 
+                # For pairs that have more than one event end(more than two event codes)
                 else:
 
-                    index_points = []
                     ec_event = df_ec.to_dicts()
+                    remove_rows = []
+
+                    # drop repeating end codes
                     i = 0
                     while i < (df_ec.height - 1):
-                        # TODO: this logic needs to be clearer?
-                        # TODO: does this logic cover other multi pair situations?
                         if (ec_event[i]["event_code"] in ec_pair["event_end"]) and (
                             ec_event[i + 1]["event_code"] in ec_pair["event_end"]
                         ):
-                            index_points.append(i + 1)
+                            remove_rows.append(i + 1)
                         i += 1
 
+                    # drop redundant/repeating events ie [1 0 0 0 1 0]
                     df_ec = (
                         df_ec.with_row_index()
-                        .filter(~pl.col("index").is_in(index_points))
+                        .filter(~pl.col("index").is_in(remove_rows))
                         .drop("index")
                     )
 
-                    # df_ec.write_csv("dfec_filtered.csv")
+                # If df starts with event_end code, delete to start with event start code
+                # Currently cannot handle orphan end events
+                if df_ec["event_code"].first() in ec_pair["event_end"]:
+                    df_ec = df_ec.slice(offset=1)
 
                 # ================================================
                 #                Concat Logic
