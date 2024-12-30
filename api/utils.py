@@ -70,7 +70,6 @@ def clean_csvs(dir_list: list, path: str):
     df_holder = []
 
     for file in dir_list:
-        print(file)
         df = pl.read_csv(
             source=path + "/" + file,
             has_header=False,

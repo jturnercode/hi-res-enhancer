@@ -119,7 +119,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
         )
     )
 
-    print("----** Start data size: ", df_data.shape)
+    print("----> Start data size: ", df_data.shape)
 
     # ================================================
     #  *        Single Event Codes w/Parmameters

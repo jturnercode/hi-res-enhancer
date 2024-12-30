@@ -200,7 +200,11 @@ const gridOptions = {
     { field: "ovl_status", headerName: "Overlap Status" },
     { field: "ops_status", headerName: "Operational Status" },
     { field: "time_grp", headerName: "Time Group", hide: true },
-    { field: "time_increment", headerName: "Time Increment (sec)" },
+    {
+      field: "time_increment",
+      filter: "agNumberColumnFilter",
+      headerName: "Time Increment (sec)",
+    },
   ],
 
   autoSizeStrategy: {
