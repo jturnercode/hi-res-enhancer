@@ -134,11 +134,8 @@ let danger_arr = [
   "173-8",
   "200-15", //flash alarm
   "201-15",
-  "200-2", //stop timing
-  "201-2",
-  "182-1", //power failure
-  "180-1", //Stop time
-  "180-0",
+  "180-0", // Stop time
+  "180-1",
   "179-0", // Interval advance
   "179-1",
   "200-21", // SDLC Fault
@@ -153,15 +150,24 @@ let danger_arr = [
 
 // Event codes to color text blue
 let ops_arr = [
-  "184-1", //power restored
-  "200-1", //power up alarm
+  "182-1", // power failure
+  "184-1", // power restored
+  "200-1", // power up alarm
   "201-1",
   "200-5",
   "201-5",
-  "200-48",
-  "201-48",
   "200-73",
   "201-73",
+];
+
+// Non Parameter dependant Event codes to color text blue
+let ops_arr2 = [
+  102, // preempt input on
+  104,
+  105, // preempt entry
+  106, // preempt track clear
+  107, // preempt dwell
+  111, // preempt exit
 ];
 
 let green_arr_start = [1, 61, 62];
@@ -226,6 +232,7 @@ const gridOptions = {
           "-" +
           params.data.parameter.toString()
       ),
+    "rag-ops2": (params) => ops_arr2.includes(params.data.event_code),
 
     "rag-time": (params) => params.data.time_grp == "x",
   },
