@@ -58,6 +58,7 @@ async function fetchLocids() {
       // NOTE: allow origins * cannot be used with credential include
       // , {credentials: "include", }
     );
+    // TODO: since async the below if check  never runs, test?
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
     }
@@ -79,33 +80,42 @@ async function fetchLocids() {
  *=============================================**/
 
 async function fetch_griddata() {
-  // TODO: ***add exception catch, return for ag grid
-  console.log("getting data------->");
-
   // default datetime has 'T' format; remove and split date/hour
   let sdt = start_dtInput.value.replace("T", " ");
   let edt = end_dtInput.value.replace("T", " ");
 
   getdataBtn.classList.add("is-loading");
 
-  let response = await fetch(
-    `${API_URL}/hiresgrid?locid=${locationSel.value}&startdt=${sdt}&enddt=${edt}`
-  );
+  try {
+    let response = await fetch(
+      `${API_URL}/hiresgrid?locid=${locationSel.value}&startdt=${sdt}&enddt=${edt}`
+    );
 
-  // list of dictionaries
-  let gridDataObj = await response.json();
+    // list of dictionaries
+    let gridDataObj = await response.json();
 
-  getdataBtn.classList.remove("is-loading");
+    // CHECK IF DATA WAS RETURNED; IF NOT SHOW NOTIFICATION BANNER
+    if (Object.keys(gridDataObj).length === 0) {
+      noDataNotification.querySelector("p").textContent =
+        "No Data found for submitted location, date and time.";
+      noDataNotification.classList.remove("is-hidden");
+    } else {
+      // Remove user notifications
+      getdataBtn.classList.remove("is-loading");
+      noDataNotification.classList.add("is-hidden");
+    }
 
-  // CHECK IF DATA WAS RETURNED; IF NOT SHOW NOTIFICATION BANNER
-  if (Object.keys(gridDataObj).length === 0) {
+    // FILL AG GRID WITH DATA
+    gridApi.setGridOption("rowData", gridDataObj);
+  } catch (error) {
+    // TODO: clear aggrid to make more apparent to user of issue with request
+    noDataNotification.querySelector("p").textContent =
+      "Error Processing Data!";
     noDataNotification.classList.remove("is-hidden");
-  } else {
-    noDataNotification.classList.add("is-hidden");
-  }
 
-  // FILL AG GRID WITH DATA
-  gridApi.setGridOption("rowData", gridDataObj);
+    getdataBtn.classList.remove("is-loading");
+    console.error(error.message);
+  }
 }
 
 /**============================================
@@ -268,6 +278,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return 0;
     }
     end_dtInput.classList.remove("is-danger");
+
     await fetch_griddata();
 
     // Set newURl in browser but do not reload page
@@ -297,8 +308,6 @@ document.addEventListener("DOMContentLoaded", function () {
 window.onload = async function () {
   // **onload WAITs TO LOAD LOCATIONS IN Locations SELECT ELEMENT
   await fetchLocids();
-
-  console.log("---on load");
 
   // IF QUERY PARAMETERS PASSED, SET location and datetimes
   // USED for automated links that may be triggered by other apps
