@@ -1,6 +1,7 @@
 import { API_URL, APP_URL } from "./env.js";
 
-const locationSel = document.getElementById("locations");
+const locationInput = document.getElementById("locations");
+const locationDlist = document.getElementById("location-list");
 const start_dtInput = document.getElementById("start_dt");
 const end_dtInput = document.getElementById("end_dt");
 const getdataBtn = document.getElementById("getdataBtn");
@@ -51,6 +52,9 @@ end_dtInput.value = addHrs(start_dtInput.value, 1);
 /**============================================
  * *     Fetch location dropdown info
  *=============================================**/
+let locObject;
+let locReverse;
+
 async function fetchLocids() {
   try {
     let response = await fetch(
@@ -58,20 +62,21 @@ async function fetchLocids() {
       // NOTE: allow origins * cannot be used with credential include
       // , {credentials: "include", }
     );
-    // TODO: since async the below if check  never runs, test?
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
-    }
 
-    let locObject = await response.json();
+    // TODO: Do not like roundabout way for getting locid/location info for location input, find better code
+    const locInfo = await response.json();
+    locObject = locInfo[0];
+    locReverse = locInfo[1];
 
-    // add data to locations dropdown
+    // Add data to locations datalist
     for (const [k, v] of Object.entries(locObject)) {
-      let newOption = new Option(v.name, v.atms_id);
-      locationSel.add(newOption);
+      let newOption = document.createElement("option");
+      newOption.value = k;
+      locationDlist.appendChild(newOption);
     }
   } catch (error) {
     console.error(error.message);
+    console.error(response.status);
   }
 }
 
@@ -87,8 +92,9 @@ async function fetch_griddata() {
   getdataBtn.classList.add("is-loading");
 
   try {
+    let locid = locObject[locationInput.value];
     let response = await fetch(
-      `${API_URL}/hiresgrid?locid=${locationSel.value}&startdt=${sdt}&enddt=${edt}`
+      `${API_URL}/hiresgrid?locid=${locid}&startdt=${sdt}&enddt=${edt}`
     );
 
     // list of dictionaries
@@ -294,7 +300,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Set newURl in browser but do not reload page
     // Used in case user wants to copy and send as link
-    let newURL = `${APP_URL}/?startdt=${start_dtInput.value}&enddt=${end_dtInput.value}&locid=${locationSel.value}`;
+    let locid = locObject[locationInput.value];
+    let newURL = `${APP_URL}/?startdt=${start_dtInput.value}&enddt=${end_dtInput.value}&locid=${locid}`;
     window.history.pushState({}, "", newURL);
   });
 
@@ -313,6 +320,20 @@ document.addEventListener("DOMContentLoaded", function () {
   start_dtInput.addEventListener("dblclick", function () {
     start_dtInput.value = addHrs(end_dtInput.value, -1);
   });
+
+  /**======================
+   *    Validate Location Input
+   * Turn input red if selection not in
+   * location object
+   *========================**/
+  locationInput.addEventListener("change", (event) => {
+    // console.log("Input value:", event.target.value);
+    locationInput.classList.remove("is-danger");
+    if (!locObject.hasOwnProperty(event.target.value)) {
+      // if (!arr.includes(event.target.value)) {
+      locationInput.classList.add("is-danger");
+    }
+  });
 });
 
 // AFTER ALL SCRIPT AND WINDOWS LOADED;
@@ -326,7 +347,7 @@ window.onload = async function () {
 
   if (searchParams.size > 0) {
     //  Set values with .get() method
-    locationSel.value = searchParams.get("locid");
+    locationInput.value = locReverse[searchParams.get("locid")];
     start_dtInput.value = searchParams.get("startdt");
     end_dtInput.value = searchParams.get("enddt");
 

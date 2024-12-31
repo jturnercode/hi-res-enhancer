@@ -12,7 +12,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    # allow_origins=["http://127.0.0.1:5500"],
+    # allow_origins=["http://127.0.0.1:5501"],
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
@@ -74,17 +74,18 @@ ec_single_wparams: pl.DataFrame = pl.read_csv("api/ec_singles_wParams.csv")
 
 
 @app.get("/form_locids")
-async def get_locations() -> list[dict]:
+async def get_locations() -> tuple[dict, dict]:
+    # async def get_locations() -> dict:
     """Return list of atms_id, location name dictionaries
     for select dropdown"""
 
     qry = """SELECT atms_id, name FROM intersection"""
     df = pl.read_database_uri(query=qry, uri=uri, engine="adbc").sort("name")
 
-    # NOTE: anotther way to acheive results
-    # w/o list, only dictionary
-    # df = dict(zip(df["atms_id"], df["name"]))
-    return df.to_dicts()
+    # Results in dict form
+    locDict = dict(zip(df["name"], df["atms_id"]))
+    reverseDict = dict(zip(df["name"], df["atms_id"]))
+    return locDict, reverseDict
 
 
 # ================================================

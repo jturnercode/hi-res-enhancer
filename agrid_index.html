@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
     <script type="module" src="js/agrid.js"></script>
     <!-- ***css loaded after aggrid if rowclassrules used*** -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
+    />
     <link rel="stylesheet" href="css/ag.css" />
 
     <title>Hi Resolution Data</title>
@@ -31,12 +33,14 @@
         <div class="field column is-narrow">
           <label class="label">Location</label>
           <div class="control">
-            <!-- ***TODO: add text search to select-->
-            <div class="select">
-              <select id="locations" name="Location" class="validate">
-                <option value="">Select Location</option>
-              </select>
-            </div>
+            <input
+              class="input"
+              type="search"
+              list="location-list"
+              name="Location"
+              id="locations"
+            />
+            <datalist id="location-list"> </datalist>
           </div>
         </div>
 
@@ -44,7 +48,12 @@
         <div class="field column is-narrow">
           <label class="label" for="StartDate">Starting Datetime</label>
           <div class="control">
-            <input class="input validate" type="datetime-local" name="StartDate" id="start_dt" />
+            <input
+              class="input validate"
+              type="datetime-local"
+              name="StartDate"
+              id="start_dt"
+            />
           </div>
         </div>
 
@@ -52,7 +61,12 @@
         <div class="field column is-narrow">
           <label class="label" for="EndDate">End Datetime</label>
           <div class="control">
-            <input class="input validate" type="datetime-local" name="EndDate" id="end_dt" />
+            <input
+              class="input validate"
+              type="datetime-local"
+              name="EndDate"
+              id="end_dt"
+            />
           </div>
         </div>
 
@@ -69,5 +83,4 @@
     <!-- TODO: expand chart full screen if user want only to see table -->
     <div id="grid" class="ag-theme-quartz" style="height: 750px"></div>
   </body>
-
 </html>
