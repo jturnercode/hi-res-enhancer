@@ -105,6 +105,7 @@ async function fetch_griddata() {
       noDataNotification.querySelector("p").textContent =
         "No Data found for submitted location, date and time.";
       noDataNotification.classList.remove("is-hidden");
+      getdataBtn.classList.remove("is-loading");
     } else {
       // Remove user notifications
       getdataBtn.classList.remove("is-loading");
