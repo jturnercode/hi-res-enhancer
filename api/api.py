@@ -84,7 +84,7 @@ async def get_locations() -> tuple[dict, dict]:
 
     # Results in dict form
     locDict = dict(zip(df["name"], df["atms_id"]))
-    reverseDict = dict(zip(df["name"], df["atms_id"]))
+    reverseDict = dict(zip(df["atms_id"], df["name"]))
     return locDict, reverseDict
 
 
