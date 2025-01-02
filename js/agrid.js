@@ -189,13 +189,48 @@ const gridOptions = {
   // Column Definitions: Defines the columns to be displayed.
   columnDefs: [
     { field: "locid", headerName: "LocID", cellDataType: "number" },
-    { field: "dt", headerName: "Datetime", cellDataType: "text" },
-    { field: "event_code", headerName: "Event Code", cellDataType: "number" },
-    { field: "parameter", headerName: "Parameter", cellDataType: "number" },
+    {
+      field: "dt",
+      headerName: "Datetime",
+      cellDataType: "text",
+      filterParams: {
+        defaultJoinOperator: "OR",
+        buttons: ["reset", "apply"],
+        closeOnApply: true,
+      },
+    },
+    {
+      field: "event_code",
+      headerName: "Event Code",
+      cellDataType: "number",
+      filterParams: {
+        maxNumConditions: 8,
+        defaultJoinOperator: "OR",
+        buttons: ["reset", "apply"],
+        closeOnApply: true,
+      },
+    },
+    {
+      field: "parameter",
+      headerName: "Parameter",
+      cellDataType: "number",
+      filterParams: {
+        maxNumConditions: 8,
+        defaultJoinOperator: "OR",
+        buttons: ["reset", "apply"],
+        closeOnApply: true,
+      },
+    },
     {
       field: "event_descriptor",
       headerName: "Event Descriptor",
       cellDataType: "text",
+      filterParams: {
+        maxNumConditions: 8,
+        defaultJoinOperator: "OR",
+        buttons: ["reset", "apply"],
+        closeOnApply: true,
+      },
       cellClassRules: {
         "rag-red": (params) => red_arr_start.includes(params.data.event_code),
         "rag-amber": (params) =>
@@ -204,12 +239,35 @@ const gridOptions = {
           green_arr_start.includes(params.data.event_code),
       },
     },
-    { field: "phase_status", headerName: "Phase Status", cellDataType: "text" },
-    { field: "ovl_status", headerName: "Overlap Status", cellDataType: "text" },
+    {
+      field: "phase_status",
+      headerName: "Phase Status",
+      cellDataType: "text",
+      filterParams: {
+        defaultJoinOperator: "OR",
+        buttons: ["reset", "apply"],
+        closeOnApply: true,
+      },
+    },
+    {
+      field: "ovl_status",
+      headerName: "Overlap Status",
+      cellDataType: "text",
+      filterParams: {
+        defaultJoinOperator: "OR",
+        buttons: ["reset", "apply"],
+        closeOnApply: true,
+      },
+    },
     {
       field: "ops_status",
       headerName: "Operational Status",
       cellDataType: "text",
+      filterParams: {
+        defaultJoinOperator: "OR",
+        buttons: ["reset", "apply"],
+        closeOnApply: true,
+      },
     },
     {
       field: "time_grp",
@@ -220,7 +278,11 @@ const gridOptions = {
     {
       field: "time_increment",
       cellDataType: "number",
-      // filter: "agNumberColumnFilter",
+      filterParams: {
+        defaultJoinOperator: "OR",
+        buttons: ["reset", "apply"],
+        closeOnApply: true,
+      },
       headerName: "Time Increment (sec)",
     },
   ],
