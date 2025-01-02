@@ -188,13 +188,14 @@ const gridOptions = {
 
   // Column Definitions: Defines the columns to be displayed.
   columnDefs: [
-    { field: "loc_id", headerName: "LocID" },
-    { field: "dt", headerName: "Datetime" },
-    { field: "event_code", headerName: "Event Code" },
-    { field: "parameter", headerName: "Parameter" },
+    { field: "loc_id", headerName: "LocID", cellDataType: "number" },
+    { field: "dt", headerName: "Datetime", cellDataType: "text" },
+    { field: "event_code", headerName: "Event Code", cellDataType: "number" },
+    { field: "parameter", headerName: "Parameter", cellDataType: "number" },
     {
       field: "event_descriptor",
       headerName: "Event Descriptor",
+      cellDataType: "text",
       cellClassRules: {
         "rag-red": (params) => red_arr_start.includes(params.data.event_code),
         "rag-amber": (params) =>
@@ -203,13 +204,23 @@ const gridOptions = {
           green_arr_start.includes(params.data.event_code),
       },
     },
-    { field: "phase_status", headerName: "Phase Status" },
-    { field: "ovl_status", headerName: "Overlap Status" },
-    { field: "ops_status", headerName: "Operational Status" },
-    { field: "time_grp", headerName: "Time Group", hide: true },
+    { field: "phase_status", headerName: "Phase Status", cellDataType: "text" },
+    { field: "ovl_status", headerName: "Overlap Status", cellDataType: "text" },
+    {
+      field: "ops_status",
+      headerName: "Operational Status",
+      cellDataType: "text",
+    },
+    {
+      field: "time_grp",
+      headerName: "Time Group",
+      cellDataType: "text",
+      hide: true,
+    },
     {
       field: "time_increment",
-      filter: "agNumberColumnFilter",
+      cellDataType: "number",
+      // filter: "agNumberColumnFilter",
       headerName: "Time Increment (sec)",
     },
   ],
