@@ -33,13 +33,16 @@ async def root():
 # *               EXCLUDE EVENTS
 # Events that will not show up in final results
 #
-# REMOVE DETECTOR EVENTS (81,82)
-# REMOVE Alarm change events (175)
+# Exclude DETECTOR EVENTS (81,82)
+# Exclude Alarm change events (175)
+# Exclude split change codes (134-149) & (203-218)?
 # NOTE: event pairs also has a seperate exclude clause
-# TODO: exclude split change codes (134-149) & (203-218)?
 # ================================================
 
-exclude_events = [81, 82, 175]
+split_change_ec = range(134, 149)
+split_change_ec2 = range(203, 218)
+exclude_events = [81, 82, 175, *split_change_ec, *split_change_ec2]
+
 
 # ===========================
 #  * Load Event code data
@@ -49,7 +52,7 @@ exclude_events = [81, 82, 175]
 ec = pl.read_csv(source="api/event_codes.csv")
 
 
-# event code pairs
+# Event code pairs
 exclude = [200, 82]
 ec_pairs: pl.DataFrame = (
     pl.read_csv("api/event_pairs.csv")
@@ -60,10 +63,10 @@ ec_pairs: pl.DataFrame = (
     ).filter(~pl.col("event_start").is_in(exclude))
 )
 
-# single event codes
+# Single event codes
 ec_singles = pl.read_csv("api/event_singles.csv")["event_code"].to_list()
 
-# single event codes with parameters
+# Single event codes with parameters
 # ex. Unit Flash - Preempt (173,8); Unit Flash - MMU (173,6)
 ec_single_wparams: pl.DataFrame = pl.read_csv("api/ec_singles_wParams.csv")
 
@@ -107,6 +110,7 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     # Read, clean, and concat csv files
     df_data: pl.DataFrame = utils.clean_csvs(dir_list, path)
 
+    #! TODO: add filter event code dropdown, benefit calc time increments for phase splits, or checking phase intervals
     # Select only events codes that should show in final results
     # & map event descriptor to df_data
     df_data = df_data.filter(
