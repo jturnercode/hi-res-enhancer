@@ -82,7 +82,6 @@ def clean_csvs(dir_list: list, path: str):
             pl.col("dt").str.to_datetime(r"%-m/%d/%Y %H:%M:%S%.3f"),
             pl.col("event_code").str.replace_all(" ", ""),
             pl.col("parameter").str.replace_all(" ", ""),
-            # location_id=pl.lit(locid),
         ).with_columns(
             pl.col("event_code").str.to_integer(),
             pl.col("parameter").str.to_integer(),

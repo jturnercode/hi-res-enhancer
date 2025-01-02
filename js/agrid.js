@@ -188,7 +188,7 @@ const gridOptions = {
 
   // Column Definitions: Defines the columns to be displayed.
   columnDefs: [
-    { field: "loc_id", headerName: "LocID", cellDataType: "number" },
+    { field: "locid", headerName: "LocID", cellDataType: "number" },
     { field: "dt", headerName: "Datetime", cellDataType: "text" },
     { field: "event_code", headerName: "Event Code", cellDataType: "number" },
     { field: "parameter", headerName: "Parameter", cellDataType: "number" },

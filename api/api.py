@@ -92,6 +92,7 @@ async def get_locations() -> tuple[dict, dict]:
 # *               Hi-res Function
 # get and process hi-res data into dataframe
 # ================================================
+# TODO: move to another module to clean up fastapi main routes code
 
 
 def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
@@ -305,11 +306,13 @@ def process_hires(locid: str, sdate: datetime, edate: datetime) -> pl.DataFrame:
     )
 
     # ================================================
-    #     Add locid column, sort, & formatting
+    #     Add loc_id column, sort, & formatting
     # ================================================
+
     df_data = (
         df_data.sort(by=["dt", "event_code", "parameter"]).select(
-            pl.lit(locid).alias("loc_id"),
+            # add locid column
+            pl.lit(locid).cast(pl.Int32).alias("locid"),
             pl.all(),
         )
         # Format dates to string and round off duration
@@ -336,8 +339,6 @@ async def get_hires_grid(
     locid: str,
     startdt: str,
     enddt: str,
-    # time: str | None = "0000",
-    # addhrs: str | None = "1",
 ) -> list[dict]:
 
     enddt = datetime.fromisoformat(enddt)
