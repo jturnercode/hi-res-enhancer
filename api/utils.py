@@ -77,19 +77,22 @@ def clean_csvs(dir_list: list, path: str):
             new_columns=["dt", "event_code", "parameter"],
         )
 
-        # format columns
-        df = df.with_columns(
-            pl.col("dt").str.to_datetime(r"%-m/%d/%Y %H:%M:%S%.3f"),
-            pl.col("event_code").str.replace_all(" ", ""),
-            pl.col("parameter").str.replace_all(" ", ""),
-        ).with_columns(
-            pl.col("event_code").str.to_integer(),
-            pl.col("parameter").str.to_integer(),
-        )
-
         df_holder.append(df)
 
-    return pl.concat(df_holder).sort(by="dt")
+    # concat data
+    newdf = pl.concat(df_holder)
+
+    # Format columns
+    newdf = newdf.with_columns(
+        pl.col("dt").str.to_datetime(r"%-m/%d/%Y %H:%M:%S%.3f"),
+        pl.col("event_code").str.replace_all(" ", ""),
+        pl.col("parameter").str.replace_all(" ", ""),
+    ).with_columns(
+        pl.col("event_code").str.to_integer(),
+        pl.col("parameter").str.to_integer(),
+    )
+
+    return newdf.sort(by="dt")
 
 
 def singles_wparams(df_ecodes: pl.DataFrame, df_data: pl.DataFrame) -> pl.DataFrame:
