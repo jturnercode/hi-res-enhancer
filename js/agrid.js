@@ -5,6 +5,7 @@ const locationDlist = document.getElementById("location-list");
 const start_dtInput = document.getElementById("start_dt");
 const end_dtInput = document.getElementById("end_dt");
 const getdataBtn = document.getElementById("getdataBtn");
+const downloadBtn = document.getElementById("dwnloadBtn");
 const noDataNotification = document.getElementById("noDataNotification");
 
 /**=======================
@@ -377,6 +378,14 @@ document.addEventListener("DOMContentLoaded", function () {
     let locid = locObject[locationInput.value];
     let newURL = `${APP_URL}/?startdt=${start_dtInput.value}&enddt=${end_dtInput.value}&locid=${locid}`;
     window.history.pushState({}, "", newURL);
+  });
+
+  /**======================
+   *    Download Csv Button
+   *========================**/
+
+  downloadBtn.addEventListener("click", async function () {
+    gridApi.exportDataAsCsv();
   });
 
   /**======================
